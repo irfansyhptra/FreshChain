@@ -1,0 +1,860 @@
+/* Layout Utilities */
+.bodyLayout {
+    background-color: var(--surface);
+    color: var(--on-surface);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+}
+
+.fontHeadline {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 16rem;
+    height: 100vh;
+    background-color: #f8fafc;
+    border-right: 1px solid rgba(226, 232, 240, 0.5);
+    display: flex;
+    flex-direction: column;
+    padding-top: 5rem;
+    padding-bottom: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    z-index: 40;
+}
+
+.sbHeader {
+    margin-bottom: 2.5rem;
+    padding: 0 1rem;
+}
+
+.sbTitle {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: #065f46;
+}
+
+.sbSub {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.sbNav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.navItem:hover {
+    background-color: #f1f5f9;
+    transform: translateX(4px);
+}
+
+.navItem.active {
+    background-color: #ecfdf5;
+    color: #047857;
+    font-weight: 600;
+    border-right: 4px solid #059669;
+    border-radius: 0.75rem 0 0 0.75rem;
+}
+
+.navItemIcon {
+    margin-right: 0.75rem;
+}
+
+.sbFooter {
+    margin-top: auto;
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.navItemSub {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.navItemSub:hover {
+    color: #059669;
+}
+
+/* Top Navbar */
+.topNav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 50;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 1px 2px rgba(6, 78, 59, 0.05);
+    height: 4rem;
+}
+
+.tnInner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    height: 100%;
+    width: 100%;
+}
+
+.tnBrand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #064e3b;
+}
+
+.tnRight {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.searchBox {
+    display: none;
+    align-items: center;
+    background-color: var(--surface-container-low);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(188, 202, 192, 0.15);
+}
+
+@media (min-width: 768px) {
+    .searchBox {
+        display: flex;
+    }
+}
+
+.searchInput {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.875rem;
+    color: var(--on-surface);
+    width: 12rem;
+}
+
+.btnIcon {
+    padding: 0.5rem;
+    color: #64748b;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btnIcon:hover {
+    color: #059669;
+}
+
+.avatarWrap {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-left: 0.5rem;
+    border: 2px solid #d1fae5;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tnDivider {
+    height: 1px;
+    background: linear-gradient(to right, rgba(5, 150, 105, 0.05), transparent);
+}
+
+/* Main Content */
+.main {
+    min-height: 100vh;
+    padding-left: 16rem;
+    padding-top: 4rem;
+}
+
+.content {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Header */
+.pageHeader {
+    margin-bottom: 2.5rem;
+}
+
+.phTitle {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: var(--on-surface);
+    letter-spacing: -0.025em;
+    margin-bottom: 0.5rem;
+}
+
+.phDesc {
+    color: var(--on-surface-variant);
+    font-size: 1rem;
+}
+
+/* Horizontal Stepper */
+.stepperWrap {
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.stepperLine {
+    position: absolute;
+    top: 1.25rem;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--surface-container-highest);
+    z-index: 0;
+}
+
+.stepperContent {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stepCircle {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    box-shadow: 0 0 0 4px var(--surface);
+}
+
+.stepCircle.active {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    box-shadow: 0 0 0 4px var(--surface), 0 10px 15px -3px rgba(0, 105, 72, 0.2);
+}
+
+.stepCircle.inactive {
+    background-color: var(--surface-container-highest);
+    color: var(--on-surface-variant);
+}
+
+.stepLabel {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stepLabel.active {
+    color: var(--primary);
+}
+
+.stepLabel.inactive {
+    color: var(--on-surface-variant);
+    font-weight: 600;
+}
+
+/* Grid Layout */
+.gridRoot {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+@media (min-width: 1024px) {
+    .gridRoot {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .gridLeft {
+        grid-column: span 8 / span 8;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .gridRight {
+        grid-column: span 4 / span 4;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+}
+
+/* Glass Card */
+.glassCard {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(188, 202, 192, 0.1);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.chLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chIconWrap {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background-color: rgba(0, 105, 72, 0.1);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.btnAdd {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--primary-fixed);
+    color: var(--on-primary-fixed);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btnAdd:hover {
+    opacity: 0.9;
+}
+
+/* Form Elements */
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .formRow {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.colSpan2 {
+    grid-column: 1 / -1;
+}
+
+.label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+}
+
+.input {
+    width: 100%;
+    background-color: var(--surface-container-low);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: var(--on-surface);
+    font-weight: 500;
+    outline: none;
+    transition: box-shadow 0.2s;
+}
+
+.input:focus {
+    box-shadow: 0 0 0 2px rgba(0, 105, 72, 0.2);
+}
+
+.inputWithIcon {
+    position: relative;
+}
+
+.inputWithIcon input {
+    padding-left: 2.5rem;
+}
+
+.inputIcon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+/* Milestone Items */
+.milestoneList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.msItem {
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    background-color: var(--surface-container-lowest);
+    border: 1px solid rgba(188, 202, 192, 0.05);
+}
+
+.msItem.disabled {
+    opacity: 0.6;
+}
+
+.msHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.msTitle {
+    font-weight: 700;
+    color: #064e3b;
+    font-size: 1rem;
+}
+
+.msDesc {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    margin-top: 0.25rem;
+}
+
+.badgeWarn {
+    background-color: rgba(0, 105, 72, 0.1);
+    color: var(--primary);
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.btnDelete {
+    color: #94a3b8;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btnDelete:hover {
+    color: var(--error);
+}
+
+.msGrid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    .msGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.msGridCol2 {
+    grid-column: span 2 / span 2;
+}
+
+.msBoxLabel {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.msBoxValue {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem;
+    background-color: var(--surface-container-low);
+    border-radius: 0.25rem;
+}
+
+.msProof {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: rgba(255, 221, 184, 0.2);
+    border-radius: 0.5rem;
+}
+
+.msProofIcon {
+    color: var(--tertiary);
+    font-size: 0.875rem;
+}
+
+.msProofText {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--on-tertiary-fixed-variant);
+}
+
+.msProofText strong {
+    font-weight: 700;
+}
+
+/* Smart Contract Banner */
+.scBanner {
+    background: linear-gradient(to bottom right, var(--primary), var(--primary-container));
+    padding: 1.5rem;
+    border-radius: 1rem;
+    color: var(--on-primary);
+    box-shadow: 0 10px 15px -3px rgba(0, 105, 72, 0.2);
+}
+
+.scHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.scTitle {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.scDesc {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+}
+
+.scBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    backdrop-filter: blur(4px);
+}
+
+/* Jaminan Section */
+.jmHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.jmIcon {
+    color: var(--secondary);
+}
+
+.jmDesc {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.jmBox {
+    background-color: var(--surface-container-high);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.jmRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.jmLabel {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.jmVal {
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.jmDivider {
+    border-bottom: 1px solid rgba(188, 202, 192, 0.2);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.jmMethod {
+    margin-top: 1rem;
+}
+
+.jmSubLabel {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.jmGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.jmBtnMethod {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background-color: var(--surface-container-lowest);
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.jmBtnMethod.active {
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.jmBtnMethod.inactive {
+    border: 1px solid transparent;
+    color: var(--on-surface-variant);
+}
+
+.btnDeposit {
+    width: 100%;
+    background: linear-gradient(to right, var(--primary), var(--primary-container));
+    color: var(--on-primary);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(0, 105, 72, 0.2);
+    transition: transform 0.2s;
+}
+
+.btnDeposit:active {
+    transform: scale(0.95);
+}
+
+.jmNote {
+    text-align: center;
+    font-size: 0.625rem;
+    color: var(--on-surface-variant);
+    margin-top: 1rem;
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* Preview Card */
+.previewCard {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(188, 202, 192, 0.1);
+    background-color: white;
+}
+
+.prImgWrap {
+    position: relative;
+    height: 8rem;
+    width: 100%;
+}
+
+.prImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.prGradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+}
+
+.prBadge {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background-color: #059669;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.prBody {
+    padding: 1rem;
+}
+
+.prTitle {
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.prAuthor {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.625rem;
+    color: #64748b;
+}
+
+.prProgress {
+    margin-top: 0.75rem;
+    width: 100%;
+    background-color: var(--surface-container-highest);
+    height: 0.25rem;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.prFill {
+    background-color: var(--primary);
+    width: 8.33%;
+    height: 100%;
+}
+
+/* Bottom Action Nav */
+.actionNav {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(188, 202, 192, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btnBack {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--on-surface-variant);
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btnBack:hover {
+    color: var(--on-surface);
+}
+
+.actionGroup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btnDraft {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--outline-variant);
+    color: var(--on-surface-variant);
+    font-weight: 700;
+    font-size: 0.875rem;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btnDraft:hover {
+    background-color: var(--surface-container-low);
+}
+
+.btnNext {
+    padding: 0.75rem 2rem;
+    border-radius: 0.75rem;
+    background-color: var(--primary-container);
+    color: var(--on-primary-container);
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: opacity 0.2s;
+}
+
+.btnNext:hover {
+    opacity: 0.9;
+}

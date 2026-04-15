@@ -1,0 +1,493 @@
+.main {
+    padding-top: 6rem;
+    padding-bottom: 3rem;
+    padding-inline: 1rem;
+    max-width: 1152px;
+    margin: 0 auto;
+}
+
+/* Nav specific */
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 50;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    padding: 0 1.5rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--primary);
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.navLinks button {
+    color: var(--primary);
+    font-weight: 600;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.navLinks button:hover {
+    text-decoration: underline;
+}
+
+/* Grid Layout container */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    .grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .colLeft {
+        grid-column: span 4 / span 4;
+    }
+
+    .colRight {
+        grid-column: span 8 / span 8;
+    }
+}
+
+/* Left Column elements */
+.h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--on-surface);
+    margin-bottom: 0.5rem;
+}
+
+.h1 span {
+    color: var(--primary);
+}
+
+.subtitle {
+    color: var(--on-surface-variant);
+    font-size: 1rem;
+}
+
+/* Stepper */
+.stepper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.step.active .stepCircle {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    box-shadow: 0 10px 15px -3px rgba(0, 105, 72, 0.2);
+}
+
+.stepCircle {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    background-color: var(--surface-container-highest);
+    color: var(--on-surface-variant);
+}
+
+.stepText {
+    display: flex;
+    flex-direction: column;
+}
+
+.stepTitle {
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--on-surface);
+}
+
+.stepDesc {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+}
+
+.opacity50 {
+    opacity: 0.5;
+}
+
+.opacity30 {
+    opacity: 0.3;
+}
+
+.opacity20 {
+    opacity: 0.2;
+}
+
+.infoBox {
+    padding: 1.5rem;
+    background-color: var(--primary-fixed);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(0, 105, 72, 0.1);
+    margin-top: 2rem;
+}
+
+.infoBox p {
+    color: var(--on-primary-fixed-variant);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.6;
+    font-style: italic;
+}
+
+/* Right Column Panels */
+.panel {
+    background-color: var(--surface-container-lowest);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(188, 202, 192, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.panelTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--on-surface);
+}
+
+.panelSubtitle {
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+}
+
+.roleGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .roleGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.roleCard {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(188, 202, 192, 0.2);
+    background-color: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    overflow: hidden;
+}
+
+.roleCard:hover {
+    border-color: rgba(0, 105, 72, 0.4);
+}
+
+.roleCard.active {
+    border: 2px solid var(--primary);
+    background-color: rgba(0, 105, 72, 0.05);
+}
+
+.bgIcon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.75rem;
+    opacity: 0.1;
+    transition: opacity 0.2s;
+}
+
+.roleCard:hover .bgIcon {
+    opacity: 0.2;
+}
+
+.bgIcon span {
+    font-size: 3.75rem;
+}
+
+.iconWrapper {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    background-color: #ecfdf5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.roleCard.active .iconWrapper {
+    background-color: var(--primary);
+    color: var(--on-primary);
+}
+
+.roleTitle {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--on-surface);
+}
+
+.roleDesc {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    line-height: 1.6;
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.progressBar {
+    height: 0.25rem;
+    width: 100%;
+    background-color: var(--surface-container-highest);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background-color: var(--primary);
+    width: 0;
+    transition: width 0.5s;
+}
+
+.roleCard:hover .progressFill {
+    width: 100%;
+}
+
+.roleCard.active .progressBar {
+    background-color: rgba(0, 105, 72, 0.2);
+}
+
+.roleCard.active .progressFill {
+    width: 100%;
+}
+
+/* Action Footer */
+.footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 1rem;
+}
+
+@media (min-width: 640px) {
+    .footer {
+        flex-direction: row;
+    }
+}
+
+.footerText {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    max-width: 24rem;
+}
+
+.footerText a {
+    color: var(--primary);
+}
+
+.footerText a:hover {
+    text-decoration: underline;
+}
+
+.btnGroup {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .btnGroup {
+        width: auto;
+    }
+}
+
+.btnBack {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    background-color: var(--surface-container-high);
+    border: none;
+    cursor: pointer;
+}
+
+.btnBack:hover {
+    background-color: var(--surface-container-highest);
+}
+
+.btnContinue {
+    flex: 1;
+    padding: 0.75rem 2.5rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    color: var(--on-primary);
+    background: linear-gradient(to right, var(--primary), var(--primary-container));
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(0, 105, 72, 0.2);
+}
+
+.btnContinue:active {
+    transform: scale(0.95);
+}
+
+/* Security Section */
+.securityPanel {
+    margin-top: 6rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 2rem;
+    border-radius: 1.5rem;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@media (min-width: 768px) {
+    .securityPanel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.secImage {
+    width: 100%;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.secTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background-color: rgba(0, 105, 72, 0.1);
+    border-radius: 9999px;
+    margin-bottom: 1rem;
+}
+
+.secTag span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+}
+
+.secTitle {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: var(--on-surface);
+    margin-bottom: 1rem;
+}
+
+.secDesc {
+    color: var(--on-surface-variant);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.secList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.secListItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+/* KYC Box */
+.kycGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .kycGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.kycCard {
+    padding: 1rem;
+    background-color: var(--surface-container-lowest);
+    border-radius: 0.75rem;
+    border: 1px dashed var(--outline-variant);
+    cursor: pointer;
+    text-align: center;
+}
+
+.kycCard:hover {
+    border-color: var(--primary);
+}
+
+.kycIconWrapper {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background-color: var(--surface-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--on-surface-variant);
+    margin: 0 auto 0.75rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.kycCard:hover .kycIconWrapper {
+    background-color: rgba(0, 105, 72, 0.1);
+    color: var(--primary);
+}
+
+.kycCardTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.kycCardDesc {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+}
