@@ -18,7 +18,7 @@ Platform mencakup:
 
 ## 🧠 Core Mindset
 
-AI agent harus:
+AI agent harus:redisgn UI dari page /traceability buat lebih soft ui
 
 * Berpikir sebagai **Fullstack Next.js Engineer + Web3 Developer**
 * Fokus pada:

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import styles from "./Navigation.module.css";
+import { Button } from "./ui/Button";
 
 export default function Navigation() {
     return (
@@ -15,10 +16,10 @@ export default function Navigation() {
             </div>
             <div className={styles.actions}>
                 <Link href="/wallet">
-                    <button className={styles.btnSecondary}>Connect Wallet</button>
+                    <Button variant="secondary" size="md">Connect Wallet</Button>
                 </Link>
                 <Link href="/register">
-                    <button className={styles.btnPrimary}>Daftar KYC</button>
+                    <Button variant="primary" size="md">Daftar KYC</Button>
                 </Link>
             </div>
         </nav>

@@ -96,42 +96,42 @@ export default function MarketplacePage() {
           </section>
 
           {/* Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            {/* Product Card 1 */}
-            <Link href="/marketplace/organic-kale" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer">
+            {/* Product Card 1: Cabai Merah */}
+            <Link href="/marketplace/cabai-merah" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full">
               <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
                 <img 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="https://images.unsplash.com/photo-1524179091875-bf5603ca9ef2?auto=format&fit=crop&q=80&w=600" 
-                  alt="Kale" 
+                  src="/buahCabai.jpeg" 
+                  alt="Cabai Merah" 
                 />
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-emerald-dark text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
-                  Organik
+                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-red-600 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
+                  Pedas Ekstra
                 </div>
               </div>
-              <div className="px-3 pb-3 flex flex-col flex-1">
+              <div className="px-3 pb-3 flex flex-col flex-1 h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-lg font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Regenerative Kale</h3>
+                    <h3 className="text-lg font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Cabai Merah Segar</h3>
                     <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
                       <span className="material-symbols-outlined text-[12px]">location_on</span>
-                      Lembang, Jawa Barat
+                      Garut, Jawa Barat
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0 ml-2">
                     <span className="block text-lg font-extrabold text-emerald-main">Rp 45k</span>
-                    <span className="text-[10px] text-slate-400">per ikat</span>
+                    <span className="text-[10px] text-slate-400">per kg</span>
                   </div>
                 </div>
                 
                 <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
-                      KB
+                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-red-50 flex items-center justify-center text-red-600 font-bold text-xs">
+                      PM
                     </div>
                     <div>
-                      <p className="text-[11px] font-bold text-slate-700">Kebun Pak Budi</p>
+                      <p className="text-[11px] font-bold text-slate-700">Petani Makmur</p>
                       <div className="flex items-center text-[10px] text-amber-500 font-medium">
                         <span className="material-symbols-outlined text-[12px] mr-0.5" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
                         4.9 (120 ulasan)
@@ -145,40 +145,40 @@ export default function MarketplacePage() {
               </div>
             </Link>
 
-            {/* Product Card 2 */}
-            <Link href="/marketplace/heirloom-tomatoes" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer mt-0">
+            {/* Product Card 2: Jagung Manis */}
+            <Link href="/marketplace/jagung-manis" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full mt-0">
               <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
                 <img 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&q=80&w=600" 
-                  alt="Heirloom Tomatoes" 
+                  src="/buahJagung.jpg" 
+                  alt="Jagung Manis" 
                 />
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-emerald-dark text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
-                  Pestisida Nol
+                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-yellow-600 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
+                  Organik
                 </div>
               </div>
-              <div className="px-3 pb-3 flex flex-col flex-1">
+              <div className="px-3 pb-3 flex flex-col flex-1 h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-lg font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Tomat Cherry Heirloom</h3>
+                    <h3 className="text-lg font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Jagung Manis Organik</h3>
                     <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
                       <span className="material-symbols-outlined text-[12px]">location_on</span>
-                      Bedugul, Bali
+                      Purwodadi, Jawa Tengah
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0 ml-2">
-                    <span className="block text-lg font-extrabold text-emerald-main">Rp 62k</span>
+                    <span className="block text-lg font-extrabold text-emerald-main">Rp 15k</span>
                     <span className="text-[10px] text-slate-400">per kg</span>
                   </div>
                 </div>
                 
                 <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-xs">
-                      AO
+                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-yellow-50 flex items-center justify-center text-yellow-600 font-bold text-xs">
+                      ST
                     </div>
                     <div>
-                      <p className="text-[11px] font-bold text-slate-700">Agung Organik</p>
+                      <p className="text-[11px] font-bold text-slate-700">Sumber Tani</p>
                       <div className="flex items-center text-[10px] text-amber-500 font-medium">
                         <span className="material-symbols-outlined text-[12px] mr-0.5" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
                         4.8 (85 ulasan)
@@ -192,53 +192,95 @@ export default function MarketplacePage() {
               </div>
             </Link>
 
-            {/* Product Card 3 Wide for Desktop / Normal for Mobile */}
-            <Link href="/marketplace/gayo-coffee" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col xl:col-span-3 xl:flex-row group cursor-pointer gap-4">
-              <div className="relative h-48 xl:h-full xl:w-2/5 rounded-2xl overflow-hidden bg-slate-100">
+            {/* Product Card 3: Tomat Merah (Normal Mobile & Desktop) */}
+            <Link href="/marketplace/tomat-merah" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full gap-4">
+              <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
                 <img 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="https://images.unsplash.com/photo-1611162458324-aae1eb4129a4?auto=format&fit=crop&q=80&w=800" 
-                  alt="Gayo Beans" 
+                  src="/buahTomat.jpg" 
+                  alt="Tomat Segar" 
                 />
-                <div className="absolute top-3 left-3 bg-amber-100 text-amber-800 text-[10px] border border-amber-200 font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
-                  Limited Batch
+                <div className="absolute top-3 left-3 bg-red-100 text-red-800 text-[10px] border border-red-200 font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
+                  Pestisida Nol
                 </div>
               </div>
-              <div className="flex flex-col flex-1 p-2 xl:py-3 xl:pr-4">
+              <div className="px-3 pb-3 flex flex-col flex-1 h-full">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="text-xl font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Biji Kopi Hijau Gayo</h3>
+                    <h3 className="text-xl font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Tomat Segar Pilihan</h3>
                     <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
                       <span className="material-symbols-outlined text-[12px]">location_on</span>
-                      Takengon, Aceh Tengah
+                      Lembang, Jawa Barat
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="block text-xl font-extrabold text-emerald-main">Rp 180k</span>
-                    <span className="text-[10px] text-slate-400">per 500g</span>
+                    <span className="block text-xl font-extrabold text-emerald-main">Rp 20k</span>
+                    <span className="text-[10px] text-slate-400">per kg</span>
                   </div>
                 </div>
-                
-                <p className="text-xs text-slate-500 leading-relaxed mt-2 mb-6 hidden xl:block">
-                  Dipetik dan dikurasi langsung dari dataran tinggi Aceh. Diproses secara alami menggunakan energi buruh tani lokal untuk memberikan profil rasa rempah dengan fruity notes yang luar biasa, ditanam bebas bahan kimia berbahaya.
-                </p>
 
                 <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border border-slate-200 bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
+                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
                       GL
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-700">Koperasi Gayo Lestari</p>
+                      <p className="text-xs font-bold text-slate-700">Kebun Gayo Lestari</p>
                       <div className="flex items-center text-[10px] text-amber-500 font-medium mt-0.5">
                         <span className="material-symbols-outlined text-[12px] mr-1" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
                         5.0 (342 ulasan)
                       </div>
                     </div>
                   </div>
-                  <button onClick={(e)=>{e.preventDefault();}} className="flex items-center gap-2 bg-emerald-main text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-emerald-main/20 hover:opacity-90 active:scale-95 transition-all">
-                    <span className="material-symbols-outlined text-[16px]">shopping_basket</span> 
-                    Tambah
+                  <button onClick={(e)=>{e.preventDefault();}} className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors">
+                    <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+                  </button>
+                </div>
+              </div>
+            </Link>
+
+            {/* Product Card 4: Timun */}
+            <Link href="/marketplace/timun" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full gap-4">
+              <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
+                <img 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  src="/buahTimun.jpeg" 
+                  alt="Timun Hibrida" 
+                />
+                <div className="absolute top-3 left-3 bg-emerald-100 text-emerald-800 text-[10px] border border-emerald-200 font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
+                  Hidroponik
+                </div>
+              </div>
+              <div className="px-3 pb-3 flex flex-col flex-1 h-full">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="text-xl font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Timun Hibrida Super</h3>
+                    <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[12px]">location_on</span>
+                      Cianjur, Jawa Barat
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-xl font-extrabold text-emerald-main">Rp 12k</span>
+                    <span className="text-[10px] text-slate-400">per kg</span>
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
+                      SB
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-700">Tani Subur</p>
+                      <div className="flex items-center text-[10px] text-amber-500 font-medium mt-0.5">
+                        <span className="material-symbols-outlined text-[12px] mr-1" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                        4.7 (215 ulasan)
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={(e)=>{e.preventDefault();}} className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors">
+                    <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
                   </button>
                 </div>
               </div>
@@ -260,13 +302,13 @@ export default function MarketplacePage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <img 
-                    src="https://images.unsplash.com/photo-1524179091875-bf5603ca9ef2?auto=format&fit=crop&q=80&w=100&h=100" 
-                    alt="Kale thumb" 
+                    src="/buahCabai.jpeg" 
+                    alt="Cabai thumb" 
                     className="w-12 h-12 rounded-xl object-cover border border-slate-100"
                   />
                   <div>
-                    <p className="text-sm font-bold text-slate-800">Regenerative Kale</p>
-                    <p className="text-xs text-emerald-main font-semibold">2 ikat</p>
+                    <p className="text-sm font-bold text-slate-800">Cabai Merah Segar</p>
+                    <p className="text-xs text-emerald-main font-semibold">2 kg</p>
                   </div>
                 </div>
                 <span className="text-sm font-bold text-slate-700">Rp 90.000</span>
@@ -275,16 +317,16 @@ export default function MarketplacePage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <img 
-                    src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&q=80&w=100&h=100" 
-                    alt="Tomato thumb" 
+                    src="/buahTomat.jpg" 
+                    alt="Tomat thumb" 
                     className="w-12 h-12 rounded-xl object-cover border border-slate-100"
                   />
                   <div>
-                    <p className="text-sm font-bold text-slate-800">Cherry Heirloom</p>
+                    <p className="text-sm font-bold text-slate-800">Tomat Segar Pilihan</p>
                     <p className="text-xs text-emerald-main font-semibold">1 kg</p>
                   </div>
                 </div>
-                <span className="text-sm font-bold text-slate-700">Rp 62.000</span>
+                <span className="text-sm font-bold text-slate-700">Rp 20.000</span>
               </div>
             </div>
 

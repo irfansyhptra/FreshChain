@@ -81,14 +81,14 @@ export default function CrowdfundingCatalog() {
           {/* Project Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
             
-            {/* Card 1 */}
+            {/* Card 1: Kebun Cabai */}
             <Link href="/crowdfunding/1" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-main/5 rounded-full blur-2xl group-hover:bg-emerald-main/10 transition-colors pointer-events-none"></div>
               
               <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-5 bg-slate-100">
                 <img 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="https://images.unsplash.com/photo-1592650073507-6c2e3ca914a8?auto=format&fit=crop&q=80&w=600" 
+                  src="/LadangCabai.jpg" 
                   alt="Kebun Cabai" 
                 />
                 <div className="absolute top-3 left-3 bg-amber-400 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-sm">
@@ -126,15 +126,15 @@ export default function CrowdfundingCatalog() {
               </div>
             </Link>
 
-            {/* Card 2 */}
+            {/* Card 2: Ladang Tomat */}
             <Link href="/crowdfunding/2" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-main/5 rounded-full blur-2xl group-hover:bg-emerald-main/10 transition-colors pointer-events-none"></div>
 
               <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-5 bg-slate-100">
                 <img 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="https://images.unsplash.com/photo-1629881180295-812e9b8979db?auto=format&fit=crop&q=80&w=600" 
-                  alt="Hydroponic Lettuce" 
+                  src="/LadangTomat.jpg" 
+                  alt="Ladang Tomat" 
                 />
                 <div className="absolute top-3 left-3 bg-emerald-500 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-sm">
                   Risiko Rendah
@@ -142,7 +142,7 @@ export default function CrowdfundingCatalog() {
               </div>
 
               <div className="flex flex-col flex-1">
-                <h3 className="text-xl font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors mb-1">Modern Hydroponic Lettuce</h3>
+                <h3 className="text-xl font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors mb-1">Proyek Ladang Tomat Hijau</h3>
                 <div className="flex items-center gap-1 text-xs text-slate-400 mb-4">
                   <span className="material-symbols-outlined text-[12px]">location_on</span>
                   Malang, Jawa Timur
@@ -172,28 +172,28 @@ export default function CrowdfundingCatalog() {
             </Link>
           </div>
 
-          {/* Bento Highlight Banner */}
-          <div className="bg-emerald-main/90 bg-gradient-to-br from-emerald-main to-[#059669] text-white rounded-3xl p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-10 shadow-xl shadow-emerald-main/30 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 lg:gap-4 lg:gap-8 group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="relative z-10 flex-1 flex flex-col items-start">
-              <span className="bg-emerald-800 text-emerald-100 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full mb-3">
-                Peluang Baru
-              </span>
-              <h2 className="text-2xl sm:text-2xl md:text-2xl md:text-3xl font-extrabold text-white font-plus mb-4 leading-tight shadow-sm">
-                Sustainable Avocado Plantation: Phase II
-              </h2>
-              <p className="text-emerald-50 text-sm mb-6 max-w-sm leading-relaxed">
-                Ekspansi lahan 5 hektar dengan smart irrigation. Bergabung sekarang dan amankan slot investasi khusus early-bird dengan ekstra dividen bulanan.
-              </p>
-              <button className="bg-white text-emerald-700 px-6 py-3 rounded-xl text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all">
-                Pelajari Proyek
-              </button>
-            </div>
-            
-            <div className="relative w-full sm:w-1/3 h-48 sm:h-56 rounded-2xl overflow-hidden shadow-lg border-4 border-white/20 z-10 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-              <img 
-                src="https://images.unsplash.com/photo-1519999482648-25049ddd37b1?auto=format&fit=crop&q=80&w=400" 
-                alt="Avocado" 
+{/* Bento Highlight Banner (Proyek Ladang Jagung) */}
+            <div className="bg-emerald-main/90 bg-gradient-to-br from-emerald-main to-[#059669] text-white rounded-3xl p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8 sm:p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-10 shadow-xl shadow-emerald-main/30 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 lg:gap-4 lg:gap-8 group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="relative z-10 flex-1 flex flex-col items-start">
+                <span className="bg-emerald-800 text-emerald-100 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full mb-3">
+                  Peluang Baru
+                </span>
+                <h2 className="text-2xl sm:text-2xl md:text-2xl md:text-3xl font-extrabold text-white font-plus mb-4 leading-tight shadow-sm">
+                  Proyek Ladang Jagung Organik: Phase II
+                </h2>
+                <p className="text-emerald-50 text-sm mb-6 max-w-sm leading-relaxed">
+                  Ekspansi lahan 5 hektar dengan smart irrigation. Bergabung sekarang dan amankan slot investasi khusus early-bird dengan ekstra dividen bulanan.
+                </p>
+                <button className="bg-white text-emerald-700 px-6 py-3 rounded-xl text-sm font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all">
+                  Pelajari Proyek
+                </button>
+              </div>
+              
+              <div className="relative w-full sm:w-1/3 h-48 sm:h-56 rounded-2xl overflow-hidden shadow-lg border-4 border-white/20 z-10 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                <img 
+                  src="/ladangJagung.jpeg" 
+                  alt="Ladang Jagung" 
                 className="w-full h-full object-cover" 
               />
             </div>

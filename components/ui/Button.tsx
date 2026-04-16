@@ -8,15 +8,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = '', variant = 'primary', size = 'md', fullWidth = false, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center rounded-xl font-medium transition-all duration-300 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseStyles = 'inline-flex items-center justify-center rounded-full font-medium transition-all duration-300 ease-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
     
-    // Glassmorphism + Soft UI
+    // macOS Liquid Glassmorphism Effect
     const variants = {
-      primary: 'bg-gradient-to-r from-emerald-main to-[#10B981] text-white shadow-md hover:shadow-lg hover:opacity-90 active:scale-95 border border-white/20 backdrop-blur-sm',
-      secondary: 'bg-glass-surface text-emerald-dark border border-white/50 backdrop-blur-md shadow-sm hover:shadow-md hover:bg-white',
-      outline: 'bg-transparent border-2 border-emerald-main text-emerald-main hover:bg-emerald-main/10 backdrop-blur-sm',
-      ghost: 'bg-transparent text-slate-gray hover:bg-slate-gray/10 backdrop-blur-md',
-      danger: 'bg-gradient-to-r from-safety-red to-[#F87171] text-white shadow-md hover:shadow-lg border border-white/20 backdrop-blur-sm'
+      primary: 'bg-white/15 hover:bg-white/25 text-white backdrop-blur-[12px] border border-white/20 shadow-[0_4px_6px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.5)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.6)] hover:-translate-y-0.5 active:scale-95',
+      secondary: 'bg-white/10 hover:bg-white/20 text-white backdrop-blur-[12px] border border-white/20 shadow-[0_4px_6px_rgba(0,0,0,0.05),inset_0_1px_1px_rgba(255,255,255,0.2)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:scale-95',
+      outline: 'bg-transparent border border-white/30 text-white hover:bg-white/10 backdrop-blur-[12px] shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:scale-95',
+      ghost: 'bg-transparent text-white hover:bg-white/15 backdrop-blur-[12px] hover:-translate-y-0.5 active:scale-95',
+      danger: 'bg-red-500/20 hover:bg-red-500/30 text-white backdrop-blur-[12px] border border-red-500/20 shadow-[0_4px_6px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.5)] hover:shadow-[0_6px_12px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.6)] hover:-translate-y-0.5 active:scale-95'
     };
 
     const sizes = {

@@ -5,15 +5,20 @@
     min-height: calc(100vh - 80px);
     /* accounting for nav */
     background: linear-gradient(135deg, #f8fef8 0%, #e8f5e9 100%);
+    padding: 2rem;
 }
 
 .card {
-    background: white;
-    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
     box-shadow: 0 10px 40px rgba(45, 106, 79, 0.08);
     padding: 3rem;
     width: 100%;
-    max-width: 500px;
+    max-width: 800px;
+    transition: all 0.3s ease;
 }
 
 .header {
@@ -31,6 +36,101 @@
     color: var(--text-muted);
 }
 
+.roleSelection {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 640px) {
+    .roleSelection {
+        grid-template-columns: 1fr;
+    }
+}
+
+.roleCard {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.02),
+                -4px -4px 10px rgba(255, 255, 255, 0.8);
+}
+
+.roleCard:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.05),
+                -8px -8px 15px rgba(255, 255, 255, 1);
+}
+
+.activeRole {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(5, 150, 105, 0.2), 
+                inset 0 -3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.activeRole p, .activeRole h3 {
+    color: white;
+}
+
+.roleIcon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.roleCard h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    color: var(--foreground);
+    transition: color 0.3s;
+}
+
+.roleCard p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    transition: color 0.3s;
+}
+
+.formSection {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.02);
+    animation: slideUpFade 0.4s ease forwards;
+}
+
+.formTitle {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+    font-size: 1.3rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 0.8rem;
+}
+
+@keyframes slideUpFade {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .formGroup {
     margin-bottom: 1.5rem;
 }
@@ -38,43 +138,24 @@
 .formGroup label {
     display: block;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
     color: var(--foreground);
 }
 
 .input {
     width: 100%;
     padding: 0.8rem 1rem;
-    border: 1px solid var(--secondary);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
     font-size: 1rem;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .input:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
-}
-
-.btnSubmit {
-    width: 100%;
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 1rem;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 1rem;
-    transition: transform 0.1s, background-color 0.2s;
-}
-
-.btnSubmit:hover {
-    background-color: var(--primary-hover);
-}
-
-.btnSubmit:active {
-    transform: scale(0.98);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1), inset 0 1px 2px rgba(0,0,0,0.01);
 }

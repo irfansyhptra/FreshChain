@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/Button";
 
 export default function AppHome() {
   const { scrollY } = useScroll();
@@ -14,6 +15,48 @@ export default function AppHome() {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<'petani' | 'investor' | 'konsumen'>('investor');
+
+  const getRoleConfig = () => {
+    switch (selectedRole) {
+      case 'petani':
+        return {
+          href: '/petani/dashboard',
+          roleName: 'Petani & Produsen',
+          doc1Icon: 'landscape',
+          doc1Title: 'KTP & Surat Tanah',
+          doc1Desc: 'Bukti Legalitas Kepemilikan Lahan',
+          doc2Icon: 'face_retouching_natural',
+          doc2Title: 'Swafoto Liveness',
+          doc2Desc: 'Pemindaian wajah biometrik'
+        };
+      case 'konsumen':
+        return {
+          href: '/marketplace',
+          roleName: 'Konsumen',
+          doc1Icon: 'contact_mail',
+          doc1Title: 'Email & No. HP',
+          doc1Desc: 'Untuk verifikasi akun dasar',
+          doc2Icon: 'local_shipping',
+          doc2Title: 'Alamat Pengiriman',
+          doc2Desc: 'Data tujuan distribusi produk'
+        };
+      case 'investor':
+      default:
+        return {
+          href: '/investor/dashboard',
+          roleName: 'Investor',
+          doc1Icon: 'upload_file',
+          doc1Title: 'KTP / Paspor Resmi',
+          doc1Desc: 'Maks 10MB (JPG, PNG)',
+          doc2Icon: 'face_retouching_natural',
+          doc2Title: 'Swafoto Liveness',
+          doc2Desc: 'Pemindaian wajah biometrik'
+        };
+    }
+  };
+
+  const currentRole = getRoleConfig();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -46,15 +89,14 @@ export default function AppHome() {
             <span className={`hidden sm:block text-sm font-semibold ${isScrolled ? 'text-slate-500' : 'text-white/80'}`}>
               Sudah punya akun?
             </span>
-            <button 
+            <Button 
+              variant={isScrolled ? "primary" : "secondary"}
+              size="sm"
               onClick={() => setIsLoginModalOpen(true)}
-              className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all focus:ring-4 ${
-              isScrolled 
-                ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md focus:ring-emerald-600/20" 
-                : "bg-white/20 backdrop-blur-sm text-white border border-white/30 hover:bg-white/30 focus:ring-white/20"
-            }`}>
+              className="!px-6 !py-2.5 rounded-full font-bold"
+            >
               Masuk
-            </button>
+            </Button>
           </div>
         </div>
       </motion.nav>
@@ -110,9 +152,9 @@ export default function AppHome() {
             transition={{ duration: 1, delay: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
           >
-            <button className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full font-bold text-lg transition-all shadow-[0_0_40px_rgb(16,185,129,0.3)] hover:shadow-[0_0_60px_rgb(16,185,129,0.5)] active:scale-95 flex items-center justify-center gap-2">
+            <Button variant="primary" size="lg" className="rounded-full !px-8 !py-4 font-bold gap-2">
               Jelajahi Ekosistem <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-            </button>
+            </Button>
           </motion.div>
         </motion.div>
 
@@ -197,13 +239,15 @@ export default function AppHome() {
                   </div>
                 </div>
 
-                <button 
+                <Button 
                   type="submit"
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-2xl shadow-[0_4px_20px_rgb(16,185,129,0.3)] hover:shadow-[0_4px_25px_rgb(16,185,129,0.4)] transition-all active:scale-[0.98] mt-2 relative overflow-hidden group"
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  className="!py-3.5 !rounded-2xl mt-2 font-bold"
                 >
                   <span className="relative z-10">Masuk ke Dashboard</span>
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                </button>
+                </Button>
               </form>
 
               <div className="relative z-10 mt-6 pt-6 border-t border-slate-200/60">
@@ -236,7 +280,7 @@ export default function AppHome() {
           >
             
             {/* Left Column: Journey Intro */}
-            <div className="w-full lg:w-5/12 space-y-10 sticky top-32">
+            <div className="w-full lg:w-5/12 space-y-10 lg:sticky lg:top-32 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <div>
                 <h2 className="text-2xl sm:text-2xl md:text-3xl md:text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-800 font-plus leading-tight tracking-tight mb-4">
                   Mulai perjalanan<br/> 
@@ -299,76 +343,126 @@ export default function AppHome() {
 
                 <div className="space-y-4">
                   {/* Petani */}
-                  <Link href="/petani/dashboard">
-                    <div className="group relative bg-white border border-slate-100 hover:border-emerald-200 p-5 rounded-2xl cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:shadow-emerald-500/10">
-                      <div className="absolute right-[-10%] top-[-20%] text-slate-50 group-hover:text-emerald-50 transition-colors">
-                        <span className="material-symbols-outlined text-[120px]" style={{fontVariationSettings: "'FILL' 1"}}>agriculture</span>
-                      </div>
-                      <div className="relative z-10 flex gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-orange-50 text-orange-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 flex items-center justify-center shrink-0 transition-colors">
-                          <span className="material-symbols-outlined text-[28px]">agriculture</span>
-                        </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 className="text-lg font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">Petani & Produsen</h3>
-                          </div>
-                          <p className="text-sm text-slate-500 mb-4 pr-10">Daftarkan proyek Anda, raih pendanaan, dan pantau produksi menggunakan pencatatan terdesentralisasi.</p>
-                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="w-0 group-hover:w-full h-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-500 ease-out"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-
-                  {/* Investor */}
-                  <Link href="/investor/dashboard">
-                    <div className="group relative bg-emerald-50/50 border-2 border-emerald-500 p-5 rounded-2xl cursor-pointer overflow-hidden transition-all shadow-md shadow-emerald-500/10">
+                  <div 
+                    onClick={() => setSelectedRole('petani')}
+                    className={`group relative border p-5 rounded-2xl cursor-pointer overflow-hidden transition-all hover:shadow-lg ${selectedRole === 'petani' ? 'bg-emerald-50/50 border-emerald-500 shadow-md shadow-emerald-500/10' : 'bg-white border-slate-100 hover:border-emerald-200 hover:shadow-emerald-500/10'}`}
+                  >
+                    {selectedRole === 'petani' && (
                       <div className="absolute right-4 top-4 z-20">
                         <span className="material-symbols-outlined text-emerald-500" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
                       </div>
-                      <div className="absolute right-[-10%] top-[-20%] text-emerald-100/50 transition-colors">
-                        <span className="material-symbols-outlined text-[120px]" style={{fontVariationSettings: "'FILL' 1"}}>account_balance</span>
+                    )}
+                    <div className="absolute right-[-10%] top-[-20%] text-slate-50 group-hover:text-emerald-50 transition-colors">
+                      <span className="material-symbols-outlined text-[120px]" style={{fontVariationSettings: "'FILL' 1"}}>agriculture</span>
+                    </div>
+                    <div className="relative z-10 flex gap-4">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-colors ${selectedRole === 'petani' ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/40' : 'bg-orange-50 text-orange-600 group-hover:bg-emerald-50 group-hover:text-emerald-600'}`}>
+                        <span className="material-symbols-outlined text-[28px]">agriculture</span>
                       </div>
-                      <div className="relative z-10 flex gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-500/40">
-                          <span className="material-symbols-outlined text-[28px]">account_balance</span>
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className={`text-lg font-bold transition-colors ${selectedRole === 'petani' ? 'text-emerald-800' : 'text-slate-800 group-hover:text-emerald-700'}`}>Petani & Produsen</h3>
                         </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 className="text-lg font-bold text-emerald-800">Investor Terverifikasi</h3>
-                          </div>
-                          <p className="text-sm text-emerald-700/80 mb-4 pr-10">Diversifikasikan portofolio Anda ke permodalan agrikultur aset hijau dunia nyata. Pantau ROI teraman.</p>
-                          <div className="w-full h-1.5 bg-emerald-200/50 rounded-full overflow-hidden">
-                            <div className="w-2/3 h-full bg-emerald-500 rounded-full"></div>
-                          </div>
+                        <p className={`text-sm mb-4 pr-10 ${selectedRole === 'petani' ? 'text-emerald-700/80' : 'text-slate-500'}`}>Daftarkan proyek Anda, raih pendanaan, dan pantau produksi menggunakan pencatatan terdesentralisasi.</p>
+                        <div className={`w-full h-1.5 rounded-full overflow-hidden ${selectedRole === 'petani' ? 'bg-emerald-200/50' : 'bg-slate-100'}`}>
+                          <div className={`h-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-500 ease-out ${selectedRole === 'petani' ? 'w-2/3 bg-emerald-500' : 'w-0 group-hover:w-full'}`}></div>
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
+
+                  {/* Investor */}
+                  <div 
+                    onClick={() => setSelectedRole('investor')}
+                    className={`group relative border p-5 rounded-2xl cursor-pointer overflow-hidden transition-all hover:shadow-lg ${selectedRole === 'investor' ? 'bg-emerald-50/50 border-emerald-500 shadow-md shadow-emerald-500/10' : 'bg-white border-slate-100 hover:border-emerald-200 hover:shadow-emerald-500/10'}`}
+                  >
+                    {selectedRole === 'investor' && (
+                      <div className="absolute right-4 top-4 z-20">
+                        <span className="material-symbols-outlined text-emerald-500" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
+                      </div>
+                    )}
+                    <div className="absolute right-[-10%] top-[-20%] text-slate-50 group-hover:text-emerald-50 transition-colors">
+                      <span className="material-symbols-outlined text-[120px]" style={{fontVariationSettings: "'FILL' 1"}}>account_balance</span>
+                    </div>
+                    <div className="relative z-10 flex gap-4">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-colors ${selectedRole === 'investor' ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/40' : 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-50 group-hover:text-emerald-600'}`}>
+                        <span className="material-symbols-outlined text-[28px]">account_balance</span>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className={`text-lg font-bold transition-colors ${selectedRole === 'investor' ? 'text-emerald-800' : 'text-slate-800 group-hover:text-emerald-700'}`}>Investor Terverifikasi</h3>
+                        </div>
+                        <p className={`text-sm mb-4 pr-10 ${selectedRole === 'investor' ? 'text-emerald-700/80' : 'text-slate-500'}`}>Diversifikasikan portofolio Anda ke permodalan agrikultur aset hijau dunia nyata. Pantau ROI teraman.</p>
+                        <div className={`w-full h-1.5 rounded-full overflow-hidden ${selectedRole === 'investor' ? 'bg-emerald-200/50' : 'bg-slate-100'}`}>
+                          <div className={`h-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-500 ease-out ${selectedRole === 'investor' ? 'w-2/3 bg-emerald-500' : 'w-0 group-hover:w-full'}`}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Konsumen */}
-                  <Link href="/marketplace">
-                    <div className="group relative bg-white border border-slate-100 hover:border-blue-200 p-5 rounded-2xl cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:shadow-blue-500/10">
-                      <div className="absolute right-[-10%] top-[-20%] text-slate-50 group-hover:text-blue-50 transition-colors">
-                        <span className="material-symbols-outlined text-[120px]" style={{fontVariationSettings: "'FILL' 1"}}>shopping_basket</span>
+                  <div 
+                    onClick={() => setSelectedRole('konsumen')}
+                    className={`group relative border p-5 rounded-2xl cursor-pointer overflow-hidden transition-all hover:shadow-lg ${selectedRole === 'konsumen' ? 'bg-blue-50/50 border-blue-500 shadow-md shadow-blue-500/10' : 'bg-white border-slate-100 hover:border-blue-200 hover:shadow-blue-500/10'}`}
+                  >
+                    {selectedRole === 'konsumen' && (
+                      <div className="absolute right-4 top-4 z-20">
+                        <span className="material-symbols-outlined text-blue-500" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
                       </div>
-                      <div className="relative z-10 flex gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 flex items-center justify-center shrink-0 transition-colors">
-                          <span className="material-symbols-outlined text-[28px]">shopping_basket</span>
+                    )}
+                    <div className="absolute right-[-10%] top-[-20%] text-slate-50 group-hover:text-blue-50 transition-colors">
+                      <span className="material-symbols-outlined text-[120px]" style={{fontVariationSettings: "'FILL' 1"}}>shopping_basket</span>
+                    </div>
+                    <div className="relative z-10 flex gap-4">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-colors ${selectedRole === 'konsumen' ? 'bg-blue-500 text-white shadow-sm shadow-blue-500/40' : 'bg-slate-50 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>
+                        <span className="material-symbols-outlined text-[28px]">shopping_basket</span>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 className={`text-lg font-bold transition-colors ${selectedRole === 'konsumen' ? 'text-blue-800' : 'text-slate-800 group-hover:text-blue-700'}`}>Konsumen</h3>
                         </div>
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 className="text-lg font-bold text-slate-800 group-hover:text-blue-700 transition-colors">Konsumen</h3>
-                          </div>
-                          <p className="text-sm text-slate-500 mb-4 pr-10">Akses langsung ke hasil bumi organik yang bisa dilacak asal mulanya melalui verifikasi blockchain.</p>
-                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="w-0 group-hover:w-full h-full bg-gradient-to-r from-blue-400 to-sky-400 transition-all duration-500 ease-out"></div>
-                          </div>
+                        <p className={`text-sm mb-4 pr-10 ${selectedRole === 'konsumen' ? 'text-blue-700/80' : 'text-slate-500'}`}>Akses langsung ke hasil bumi organik yang bisa dilacak asal mulanya melalui verifikasi blockchain.</p>
+                        <div className={`w-full h-1.5 rounded-full overflow-hidden ${selectedRole === 'konsumen' ? 'bg-blue-200/50' : 'bg-slate-100'}`}>
+                          <div className={`h-full bg-gradient-to-r from-blue-400 to-sky-400 transition-all duration-500 ease-out ${selectedRole === 'konsumen' ? 'w-2/3 bg-blue-500' : 'w-0 group-hover:w-full'}`}></div>
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detail Akun Preview Box */}
+              <div className="bg-white/60 backdrop-blur-2xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-4 sm:p-6 lg:p-4 sm:p-6 lg:p-8">
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Detail Akun</h3>
+                <p className="text-sm text-slate-500 mb-6">Pengaturan Email & Keamanan</p>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Nama Lengkap</label>
+                      <input type="text" placeholder="Sesuai Identitas" className="w-full bg-transparent outline-none text-sm text-slate-800 font-medium placeholder-slate-400" />
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Email Anda</label>
+                      <input type="email" placeholder="akun@email.com" className="w-full bg-transparent outline-none text-sm text-slate-800 font-medium placeholder-slate-400" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Nomor HP</label>
+                      <input type="tel" placeholder="08123456789" className="w-full bg-transparent outline-none text-sm text-slate-800 font-medium placeholder-slate-400" />
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Tanggal Lahir</label>
+                      <input type="date" className="w-full bg-transparent outline-none text-sm text-slate-800 font-medium text-slate-400" />
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Alamat Lengkap</label>
+                    <textarea rows={2} placeholder="Masukkan alamat lengkap" className="w-full bg-transparent outline-none text-sm text-slate-800 font-medium placeholder-slate-400 resize-none"></textarea>
+                  </div>
                 </div>
               </div>
 
@@ -378,26 +472,26 @@ export default function AppHome() {
                    <span className="bg-slate-800 text-white px-3 py-1 text-xs font-bold rounded-full tracking-wide">WAJIB KYC</span>
                 </div>
                 
-                <h3 className="text-lg font-bold text-slate-800 mb-1">Pratinjau Identitas</h3>
-                <p className="text-sm text-slate-500 mb-6">Contoh syarat dokumen bagi <strong className="text-emerald-600">Investor</strong></p>
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Verifikasi KYC</h3>
+                <p className="text-sm text-slate-500 mb-6">Pemeriksaan Identitas Otomatis bagi <strong className={selectedRole === 'konsumen' ? 'text-blue-600' : 'text-emerald-600'}>{currentRole.roleName}</strong></p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-white p-4 rounded-2xl border border-slate-100 flex gap-3 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="bg-white p-4 rounded-2xl border border-slate-100 flex gap-3 shadow-sm transition-shadow">
                     <div className="w-10 h-10 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center border border-slate-100 shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">upload_file</span>
+                      <span className="material-symbols-outlined text-[20px]">{currentRole.doc1Icon}</span>
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-800">KTP / Paspor Resmi</p>
-                      <p className="text-xs text-slate-500 mt-0.5">Maks 10MB (JPG, PNG)</p>
+                      <p className="text-sm font-bold text-slate-800">{currentRole.doc1Title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{currentRole.doc1Desc}</p>
                     </div>
                   </div>
-                  <div className="bg-white p-4 rounded-2xl border border-slate-100 flex gap-3 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="bg-white p-4 rounded-2xl border border-slate-100 flex gap-3 shadow-sm transition-shadow">
                     <div className="w-10 h-10 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center border border-slate-100 shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">face_retouching_natural</span>
+                      <span className="material-symbols-outlined text-[20px]">{currentRole.doc2Icon}</span>
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-800">Swafoto Liveness</p>
-                      <p className="text-xs text-slate-500 mt-0.5">Pemindaian wajah biometrik</p>
+                      <p className="text-sm font-bold text-slate-800">{currentRole.doc2Title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{currentRole.doc2Desc}</p>
                     </div>
                   </div>
                 </div>
@@ -412,8 +506,8 @@ export default function AppHome() {
                   <button className="flex-1 sm:flex-none px-6 py-3 font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
                     Kembali
                   </button>
-                  <Link href="/wallet" className="flex-1 sm:flex-none">
-                    <button className="w-full px-8 py-3 font-bold text-white bg-emerald-600 border border-emerald-500 shadow-sm shadow-emerald-500/20 rounded-xl hover:bg-emerald-700 transition-colors">
+                  <Link href={currentRole.href} className="flex-1 sm:flex-none">
+                    <button className={`w-full px-8 py-3 font-bold text-white border shadow-sm rounded-xl transition-colors ${selectedRole === 'konsumen' ? 'bg-blue-600 border-blue-500 shadow-blue-500/20 hover:bg-blue-700' : 'bg-emerald-600 border-emerald-500 shadow-emerald-500/20 hover:bg-emerald-700'}`}>
                       Lanjutkan
                     </button>
                   </Link>
