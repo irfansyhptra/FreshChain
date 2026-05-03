@@ -108,7 +108,7 @@ export default function AppHome() {
           style={{ y: heroY, scale: heroScale }}
         >
           {/* Background Image Wrapper */}
-          <div className="absolute inset-0 bg-[url('/background.png')] bg-cover bg-center bg-no-repeat" />
+          <div className="absolute inset-0 bg-[url('/background.jpg')] bg-cover bg-center bg-no-repeat" />
           {/* Dark/Green Gradient Overlay to ensure text readability */}
           <div className="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-emerald-950/40 to-slate-900/90" />
         </motion.div>
