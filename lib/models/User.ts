@@ -97,9 +97,8 @@ const UserSchema: Schema = new Schema({
 });
 
 // Update the updatedAt field on save
-UserSchema.pre('save', function (next: any) {
+UserSchema.pre('save', function () {
     this.updatedAt = new Date();
-    next();
 });
 
 // Prevent model overwrite in hot-reload
