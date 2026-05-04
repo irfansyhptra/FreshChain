@@ -70,13 +70,13 @@ export default function TraceabilityHub() {
         <section className="mb-12 text-center max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-bold mb-6">
             <span className="material-symbols-outlined text-[14px]">verified_user</span>
-            100% Immutable on Blockchain
+            Traceability berbasis database (audit log)
           </div>
           <h1 className="text-2xl sm:text-2xl md:text-3xl md:text-2xl sm:text-3xl md:text-4xl sm:text-2xl md:text-3xl md:text-3xl md:text-5xl font-extrabold tracking-tight text-emerald-dark font-plus mb-4 leading-tight">
             Transparansi <span className="text-emerald-main">Dari Kebun ke Meja</span>
           </h1>
           <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
-            Lacak perjalanan produk pertanian secara real-time. Setiap langkah dicatat secara permanen di blockchain FreshChain, memberikan Anda jaminan kualitas dan asal-usul yang tak terbantahkan.
+            Lacak perjalanan produk pertanian secara real-time. Setiap langkah dicatat di database, lengkap dengan audit log untuk kebutuhan transparansi dan pelacakan.
           </p>
         </section>
 
@@ -116,7 +116,7 @@ export default function TraceabilityHub() {
                   1. Generate Digital Twin QR
                 </h2>
                 <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Buat label QR untuk ditempel pada aset fisik (kotak, peti, karung). Batch ini akan terintegrasi langsung dengan ledger blockchain kami.
+                  Buat label QR untuk ditempel pada aset fisik (kotak, peti, karung). Batch ini akan terhubung dengan log traceability di database.
                 </p>
               </div>
             </div>
@@ -153,7 +153,7 @@ export default function TraceabilityHub() {
                   2. Scan QR & Update Log
                 </h2>
                 <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Pindai QR fisik pada batch untuk mencatat lokasi dan status terbarunya secara otomatis ke jaringan blockchain.
+                  Pindai QR fisik pada batch untuk mencatat lokasi dan status terbaru ke database (traceability log).
                 </p>
               </div>
             </div>

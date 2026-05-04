@@ -65,7 +65,7 @@ export default function CrowdfundingCatalog() {
                 Sustainable <span className="text-emerald-main">Growth</span>
               </h1>
               <p className="text-slate-500 text-sm max-w-2xl leading-relaxed">
-                Hubungkan langsung dengan petani organik lokal. Transparansi melalui teknologi blockchain memastikan setiap benih yang ditanam memberikan imbal hasil sosial dan finansial.
+                Hubungkan langsung dengan petani organik lokal. Transparansi dan audit log membantu memastikan setiap milestone tercatat jelas untuk imbal hasil sosial dan finansial.
               </p>
             </div>
             

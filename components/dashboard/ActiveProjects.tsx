@@ -11,7 +11,7 @@ const projects = [
     currentFunding: "5.000 USDT",
     progress: 100,
     harvestDate: "Sep 15, 2026",
-    contract: "0x892a...1Cbb"
+    traceabilityId: "TRC-8921-BAT"
   },
   {
     id: "PRJ-105",
@@ -21,7 +21,7 @@ const projects = [
     currentFunding: "8.400 USDT",
     progress: 70,
     harvestDate: "Dec 10, 2026",
-    contract: "0x4a9F...B881"
+    traceabilityId: "TRC-3342-BAT"
   }
 ];
 
@@ -76,8 +76,8 @@ export default function ActiveProjects() {
                 <p className="font-semibold text-emerald-dark">{proj.harvestDate}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-gray mb-1">Smart Contract</p>
-                <p className="font-mono text-xs text-blockchain-blue font-bold bg-blockchain-blue/5 p-1 inline-block rounded">{proj.contract}</p>
+                <p className="text-xs text-slate-gray mb-1">Traceability Batch</p>
+                <p className="font-mono text-xs text-emerald-main font-bold bg-emerald-main/5 p-1 inline-block rounded">{proj.traceabilityId}</p>
               </div>
             </div>
             

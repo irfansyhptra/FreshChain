@@ -19,7 +19,7 @@ export default function CrowdfundingProjectDetail({ params }: { params: { slug: 
                         <span className={`material-symbols-outlined ${styles.iconBtn}`}>notifications</span>
                         <span className={`material-symbols-outlined ${styles.iconBtn}`}>settings</span>
                     </div>
-                    <button className={styles.btnConnect}>Connect Wallet</button>
+                    <button className={styles.btnConnect}>Saldo</button>
                     <div className={styles.avatarWrap}>
                         <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1tjYEPPx4sTAlv0XDWEFrBN-Jh4RJwSzGYGZ_wNe_zBnbghSoKoBS6Kj67XKW1HdSZEffklV7lNl5oWjd4Mn7BzmuBdHLTf-CxKEJbB3qh1uMXZcZirqpfIO8PlN9EzRFDVST5CJb5R60qOTzKs167uK10HrmojAATnqSw04k2GNQb8xXxzKj8nVbaVH1KEwQiqoqn9PdTq7U182hvCsYobv88f3Wd5ZwwJVinwADRTHid8csQsM7-ZVqs8qpsX71e2qrWh73wCk" alt="Avatar" />
                     </div>
@@ -86,11 +86,11 @@ export default function CrowdfundingProjectDetail({ params }: { params: { slug: 
                                 </div>
 
                                 <div className={styles.scBlock}>
-                                    <h4 className={`${styles.scTitle} ${styles.fontHeadline}`}>Escrow Smart Contract</h4>
-                                    <p className={styles.scHash}>0x71C7656EC7ab88b098defB751B7401B5f6d8976F</p>
+                                    <h4 className={`${styles.scTitle} ${styles.fontHeadline}`}>Sistem Escrow</h4>
+                                    <p className={styles.scHash}>ESCROW-REFERENCE</p>
                                     <div className={styles.scAudit}>
                                         <span className={`material-symbols-outlined ${styles.scAuditIcon}`}>security</span>
-                                        <span className={styles.scAuditText}>Audited by QuantStamp</span>
+                                        <span className={styles.scAuditText}>Tercatat di audit log</span>
                                     </div>
                                 </div>
                             </div>
@@ -183,12 +183,12 @@ export default function CrowdfundingProjectDetail({ params }: { params: { slug: 
                                             </div>
                                             <input type="radio" name="pay" className={styles.payInput} />
                                         </label>
-                                        <label className={`${styles.payOption} ${styles.active}`}>
+                                        <label className={styles.payOption}>
                                             <div className={styles.payLeft}>
-                                                <span className={`material-symbols-outlined ${styles.payIcon}`}>token</span>
-                                                <span className={styles.payText}>Crypto (MetaMask)</span>
+                                                <span className={`material-symbols-outlined ${styles.payIcon}`}>qr_code_2</span>
+                                                <span className={styles.payText}>QRIS</span>
                                             </div>
-                                            <input type="radio" name="pay" defaultChecked className={styles.payInput} />
+                                            <input type="radio" name="pay" className={styles.payInput} />
                                         </label>
                                     </div>
                                 </div>
@@ -196,7 +196,7 @@ export default function CrowdfundingProjectDetail({ params }: { params: { slug: 
                                 <button className={styles.btnInvest}>Invest Now</button>
                                 <div className={styles.secureBadge}>
                                     <span className={`material-symbols-outlined ${styles.secureBadgeIcon}`}>lock</span>
-                                    <span className={styles.secureBadgeText}>Secured by Smart Escrow Architecture</span>
+                                    <span className={styles.secureBadgeText}>Dilindungi oleh sistem escrow & audit log</span>
                                 </div>
                             </div>
 

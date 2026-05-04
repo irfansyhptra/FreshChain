@@ -72,8 +72,8 @@ export default function PetaniProjectDetail({ params }: { params: Promise<{ slug
               <span onClick={() => alert('Notifications')} className="material-symbols-outlined text-slate-gray cursor-pointer hover:text-emerald-main">notifications</span>
               <span onClick={() => alert('Settings')} className="material-symbols-outlined text-slate-gray cursor-pointer hover:text-emerald-main">settings</span>
             </div>
-            <button onClick={() => alert('Menghubungkan Metamask Web3 Wallet...')} className="bg-emerald-main text-white px-4 py-2 rounded-xl font-semibold shadow-md active:scale-95 transition-transform text-sm">
-                Connect Wallet
+            <button onClick={() => alert('Membuka informasi saldo...')} className="bg-emerald-main text-white px-4 py-2 rounded-xl font-semibold shadow-md active:scale-95 transition-transform text-sm">
+                Saldo
             </button>
           </div>
         </header>

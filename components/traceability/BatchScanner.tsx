@@ -33,7 +33,7 @@ export default function BatchScanner() {
     <form onSubmit={handleScan} className="bg-white/60 backdrop-blur-xl border border-white/50 rounded-2xl p-6 shadow-sm">
       <h3 className="text-xl font-bold text-emerald-dark mb-4 flex items-center gap-2">
         <span className="material-symbols-outlined">qr_code_scanner</span>
-        Physically Scan Batch to Blockchain
+        Physically Scan Batch to Database Log
       </h3>
       
       <div className="space-y-4">
@@ -83,7 +83,7 @@ export default function BatchScanner() {
           disabled={loading}
           className="w-full mt-4 bg-gradient-to-r from-blockchain-blue to-[#2563EB] text-white px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
         >
-          {loading ? "Syncing to Blockchain..." : "Record Digital Update"}
+          {loading ? "Menyimpan ke database..." : "Record Digital Update"}
           {!loading && <span className="material-symbols-outlined text-sm">link</span>}
         </button>
 
@@ -91,9 +91,9 @@ export default function BatchScanner() {
           <div className="mt-4 p-4 bg-emerald-main/10 border border-emerald-main/20 rounded-xl text-emerald-dark">
             <p className="text-sm font-semibold flex items-center gap-1 mb-2">
               <span className="material-symbols-outlined text-emerald-main">verified</span>
-              Digital Twin Updated!
+              Traceability updated!
             </p>
-            <p className="text-xs break-all"><strong>TxHash:</strong> {result.txHash}</p>
+            <p className="text-xs break-all"><strong>Record ID:</strong> {result.recordId}</p>
           </div>
         )}
       </div>

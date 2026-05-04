@@ -16,7 +16,7 @@ const updates = [
     type: "finance",
     icon: "payments",
     color: "text-emerald-main bg-emerald-main/10",
-    message: "Funding diterima: 1.500 USDT dari 0x71F...2c90",
+    message: "Pendanaan diterima: Rp 25.000.000 (Transfer Bank)",
     time: "1 hour ago"
   },
   {
@@ -32,7 +32,7 @@ const updates = [
     type: "system",
     icon: "smart_toy",
     color: "text-orange-500 bg-orange-50",
-    message: "Smart Contract ESC-Cabai-102 mencairkan termin ke-2 (30%)",
+    message: "Escrow mencairkan termin ke-2 (30%) setelah bukti terverifikasi",
     time: "1 day ago"
   }
 ];

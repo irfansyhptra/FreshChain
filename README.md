@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FreshChain (No-Blockchain)
 
-## Getting Started
+FreshChain adalah platform distribusi pangan + traceability berbasis **database (MongoDB)**. Semua jejak perubahan disimpan sebagai **riwayat (history)** dan **audit log** di database (tanpa smart contract / blockchain).
 
-First, run the development server:
+## Requirements
+
+- Node.js (LTS)
+- MongoDB
+
+## Setup
+
+Copy environment:
+
+```bash
+cp .env.example .env
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Project memakai Mongoose + MongoDB.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Mongo connection**: `lib/mongodb/client.ts`
+- **Traceability model**: `lib/models/Traceability.ts`
+- **Audit log model**: `lib/models/AuditLog.ts`
 
-## Learn More
+## Seed (optional)
 
-To learn more about Next.js, take a look at the following resources:
+Jalankan seed untuk membuat user demo:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run db:seed
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API
 
-## Deploy on Vercel
+- **POST** `app/api/traceability/route.ts`
+  - Input minimal: `batchId`, `status`, `location`
+  - Sistem akan upsert record traceability berdasarkan `batchId` dan push ke `history[]`
+  - Response berisi `recordId`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **POST** `app/api/farmers/route.ts`
+  - Menyimpan data farmer ke MongoDB dan mencatat audit log
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

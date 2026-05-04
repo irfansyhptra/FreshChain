@@ -461,6 +461,50 @@ export default function AppHome() {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    setLoginLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setLoginError(data.error || "Login gagal");
+        setLoginLoading(false);
+        return;
+      }
+
+      // Redirect based on role
+      const role = data.user?.role?.toLowerCase();
+      if (role === "petani") {
+         window.location.href = "/petani/dashboard";
+      } else if (role === "investor") {
+         window.location.href = "/investor/dashboard";
+      } else if (role === "konsumen") {
+         window.location.href = "/marketplace";
+      } else if (role === "admin") {
+         window.location.href = "/admin";
+      } else {
+         window.location.href = "/petani/dashboard"; // fallback
+      }
+    } catch (err) {
+      console.error(err);
+      setLoginError("Terjadi kesalahan jaringan");
+      setLoginLoading(false);
+    }
+  };
 
   // Role states: null = not picked yet, string = confirmed
   const [pendingRole, setPendingRole] = useState<Role | null>(null);
@@ -502,7 +546,7 @@ export default function AppHome() {
   const roleIcons: Record<Role, string> = { petani: 'agriculture', investor: 'account_balance', konsumen: 'shopping_basket' };
   const roleBadges: Record<Role, string> = { petani: 'AGRI', investor: 'ROI', konsumen: 'BELI' };
   const roleTags: Record<Role, string[]> = {
-    petani: ['Pendanaan', 'Blockchain', 'Dashboard'],
+    petani: ['Pendanaan', 'Traceability', 'Dashboard'],
     investor: ['Portofolio', 'ROI', 'Aset Hijau'],
     konsumen: ['Organik', 'Tertelusur', 'Langsung'],
   };
@@ -657,12 +701,14 @@ export default function AppHome() {
                   <h2 className="text-2xl font-extrabold text-slate-900 font-plus tracking-tight mb-1">Selamat Datang</h2>
                   <p className="text-sm text-slate-500">Masuk ke akun FreshChain Anda.</p>
                 </div>
-                <form className="relative z-10 space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="relative z-10 space-y-4" onSubmit={handleLogin}>
+                  {loginError && <p className="text-red-500 text-xs text-center">{loginError}</p>}
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Email</label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px]">mail</span>
-                      <input type="email" placeholder="Masukkan alamat email"
+                      <input type="email" placeholder="Masukkan alamat email" required autoComplete="username"
+                        value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all"
                       />
                     </div>
@@ -674,15 +720,16 @@ export default function AppHome() {
                     </div>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-[18px]">lock</span>
-                      <input type="password" placeholder="Masukkan kata sandi"
+                      <input type="password" placeholder="Masukkan kata sandi" required autoComplete="current-password"
+                        value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all"
                       />
                     </div>
                   </div>
-                  <button type="submit"
-                    className="w-full mt-2 py-3 rounded-xl bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm transition-all shadow-md shadow-emerald-500/25 hover:shadow-lg hover:-translate-y-0.5"
+                  <button type="submit" disabled={loginLoading}
+                    className="w-full mt-2 py-3 rounded-xl bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm transition-all shadow-md shadow-emerald-500/25 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50"
                   >
-                    Masuk ke Dashboard
+                    {loginLoading ? "Memproses..." : "Masuk ke Dashboard"}
                   </button>
                 </form>
                 <div className="relative z-10 mt-5 pt-5 border-t border-slate-100">

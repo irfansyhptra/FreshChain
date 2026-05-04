@@ -233,7 +233,7 @@ export default function RegisterPage() {
                                     </label>
                                 </div>
 
-                                <Button type="submit" variant="primary" fullWidth className="!py-4 text-lg font-bold shadow-emerald-600/30">
+                                <Button type="submit" variant="primary" fullWidth className="!py-4 text-lg font-bold shadow-emerald-600/30" disabled={!selectedRole}>
                                     {selectedRole === 'Konsumen' ? 'Verifikasi & Buat Akun' : 'Ajukan Verifikasi KYC & Daftar'}
                                 </Button>
                             </div>

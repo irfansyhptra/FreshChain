@@ -52,7 +52,7 @@ export default function MarketplacePage() {
 
             <button className="hidden sm:flex items-center gap-2 bg-emerald-main text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-main/20 hover:opacity-90 active:scale-95 transition-all text-sm">
               <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-              <span>Connect Wallet</span>
+              <span>Saldo</span>
             </button>
 
             <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden hidden sm:block">
@@ -77,7 +77,7 @@ export default function MarketplacePage() {
               <div>
                 <h1 className="text-2xl sm:text-2xl md:text-3xl md:text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-emerald-dark font-plus mb-2">The Fresh Market</h1>
                 <p className="text-slate-500 text-sm max-w-lg leading-relaxed">
-                  Akses langsung ke hasil panen organik dari petani lokal. Transparan, segar, dan diverifikasi otomatis oleh blockchain.
+                  Akses langsung ke hasil panen organik dari petani lokal. Transparan, segar, dan tertelusur melalui sistem traceability berbasis database.
                 </p>
               </div>
               <button className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-dark hover:bg-slate-50 transition-colors shadow-sm whitespace-nowrap">

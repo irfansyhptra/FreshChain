@@ -16,7 +16,7 @@ export default function Navigation() {
             </div>
             <div className={styles.actions}>
                 <Link href="/wallet">
-                    <Button variant="secondary" size="md">Connect Wallet</Button>
+                    <Button variant="secondary" size="md">Saldo</Button>
                 </Link>
                 <Link href="/register">
                     <Button variant="primary" size="md">Daftar KYC</Button>

@@ -3,8 +3,8 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export interface IUser extends Document {
     name: string;
     email: string;
+    password?: string;
     role: "Petani" | "Investor" | "Konsumen" | "Admin";
-    walletAddress?: string;
     kycStatus: "Pending" | "Verified" | "Rejected";
     createdAt: Date;
 }
@@ -12,12 +12,12 @@ export interface IUser extends Document {
 const UserSchema: Schema = new Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    password: { type: String }, // Tambahan field password (optional untuk provider auth lain)
     role: {
         type: String,
         required: true,
         enum: ["Petani", "Investor", "Konsumen", "Admin"]
     },
-    walletAddress: { type: String, sparse: true }, // For crypto interactions
     kycStatus: {
         type: String,
         default: "Pending",

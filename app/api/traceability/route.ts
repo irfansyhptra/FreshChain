@@ -1,27 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb/client";
-// import Traceability from mongoose model (let's assume it exists correctly)
+import { Traceability } from "@/lib/models/Traceability";
+import { AuditLog } from "@/lib/models/AuditLog";
 
 export async function POST(req: NextRequest) {
     try {
         await dbConnect();
         const data = await req.json();
+        const { batchId, status, location, actorId, metadata, notes, productId, farmerId } = data ?? {};
 
-        // 1. In real scenario: Call smart contract method here to create tracking entry
-        // "ethers.js" connection mapping Physical Batch to Digital Twin
-        const mockTxHash = "0x" + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join("");
+        if (!batchId || !status || !location) {
+            return NextResponse.json(
+                { success: false, error: "batchId, status, dan location wajib diisi" },
+                { status: 400 }
+            );
+        }
 
-        // 2. Save metadata + transaction hash in MongoDB
-        // const newEntry = await Traceability.create({ ...data, txHash: mockTxHash });
+        const update = {
+            ...(productId ? { productId } : {}),
+            ...(farmerId ? { farmerId } : {}),
+            ...(notes ? { notes } : {}),
+            currentStatus: status,
+            currentLocation: location,
+            $push: {
+                history: {
+                    status,
+                    location,
+                    metadata: metadata ?? data,
+                    actorId,
+                    timestamp: new Date(),
+                },
+            },
+        };
+
+        const trace = await Traceability.findOneAndUpdate(
+            { batchId },
+            { $setOnInsert: { batchId, currentStatus: status, currentLocation: location, history: [] }, ...update },
+            { upsert: true, new: true }
+        );
+
+        await AuditLog.create({
+            action: "TRACEABILITY_UPSERT",
+            entityType: "Traceability",
+            entityId: trace._id.toString(),
+            actorId,
+            metadata: { batchId, status, location },
+        });
 
         return NextResponse.json({
             success: true,
-            message: "Batch status physically scanned and digitally logged.",
-            txHash: mockTxHash,
-            batchId: data.batchId,
-            status: data.status,
-            physicalLocation: data.location,
-            metadata: data
+            message: "Batch status tercatat di database (traceability log).",
+            recordId: trace._id.toString(),
+            batchId: trace.batchId,
+            status: trace.currentStatus,
+            physicalLocation: trace.currentLocation,
+            historyCount: trace.history.length,
         }, { status: 201 });
     } catch (error) {
         console.error(error);

@@ -51,7 +51,7 @@ export default function BatchQRCode({ batchId, productName }: BatchQRCodeProps) 
         />
       </div>
       
-      <p className="text-[10px] text-slate-gray mb-4 text-center">Scan to verify blockchain traceability</p>
+      <p className="text-[10px] text-slate-gray mb-4 text-center">Scan untuk melihat riwayat traceability</p>
       
       <button 
         onClick={downloadQR}

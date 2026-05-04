@@ -107,7 +107,7 @@ export default function CreateProjectPage() {
                     {/* Header */}
                     <div className={styles.pageHeader}>
                         <h2 className={`${styles.phTitle} ${styles.fontHeadline}`}>Buat Proyek Crowdfunding Baru</h2>
-                        <p className={styles.phDesc}>Bangun masa depan pertanian berkelanjutan melalui pendanaan berbasis blockchain.</p>
+                        <p className={styles.phDesc}>Bangun masa depan pertanian berkelanjutan melalui pendanaan yang transparan dan tertelusur.</p>
                     </div>
 
                     {/* Stepper */}
@@ -244,17 +244,17 @@ export default function CreateProjectPage() {
                         {/* Right Column (Sidebar Content) */}
                         <div className={styles.gridRight}>
 
-                            {/* Smart Contract Banner */}
+                            {/* Escrow Banner */}
                             <div className={styles.scBanner}>
                                 <div className={styles.scHeader}>
                                     <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>security</span>
                                     <h4 className={`${styles.scTitle} ${styles.fontHeadline}`}>Keamanan Escrow</h4>
                                 </div>
                                 <p className={styles.scDesc}>
-                                    RAB yang Anda buat akan langsung di-deploy ke <strong>Smart Contract Escrow</strong>. Dana hanya akan dicairkan per-milestone setelah bukti validasi diverifikasi oleh sistem.
+                                    RAB yang Anda buat akan masuk ke sistem escrow. Dana hanya akan dicairkan per-milestone setelah bukti validasi diverifikasi oleh sistem.
                                 </p>
                                 <div className={styles.scBadge}>
-                                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>info</span> TRANSPARANSI BLOCKCHAIN 100%
+                                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>info</span> TRANSPARANSI & AUDIT LOG
                                 </div>
                             </div>
 

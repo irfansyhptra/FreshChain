@@ -9,7 +9,7 @@ export interface IOrder extends Document {
     }>;
     totalAmount: number;
     status: "Pending" | "Paid" | "Shipped" | "Completed" | "Cancelled";
-    txHash?: string; // Payment via crypto
+    paymentReference?: string;
     createdAt: Date;
 }
 
@@ -26,7 +26,7 @@ const OrderSchema: Schema = new Schema({
         enum: ["Pending", "Paid", "Shipped", "Completed", "Cancelled"],
         default: "Pending"
     },
-    txHash: { type: String },
+    paymentReference: { type: String },
     createdAt: { type: Date, default: Date.now },
 });
 
