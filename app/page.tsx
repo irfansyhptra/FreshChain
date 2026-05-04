@@ -257,7 +257,7 @@ function KycCard({
   doc, stepKey, activeStep, onToggle, accentColor, uploaded, onUploaded,
 }: {
   doc: KycDoc; stepKey: KycStep; activeStep: KycStep; onToggle: (k: KycStep) => void;
-  accentColor: string; uploaded: boolean; onUploaded: () => void;
+  accentColor: string; uploaded: boolean; onUploaded: (file?: File | Blob) => void;
 }) {
   const c = COLOR[accentColor];
   const isOpen = activeStep === stepKey;
@@ -269,7 +269,7 @@ function KycCard({
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) { setFileName(f.name); onUploaded(); }
+    if (f) { setFileName(f.name); onUploaded(f); }
   };
 
   const startCamera = async () => {
@@ -283,10 +283,22 @@ function KycCard({
   const capturePhoto = () => {
     setCaptured(true);
     setCameraActive(false);
+    
+    if (videoRef.current) {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+        canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
+        canvas.toBlob((blob) => {
+            if (blob) onUploaded(blob);
+        }, 'image/jpeg');
+    } else {
+        onUploaded();
+    }
+
     if (videoRef.current?.srcObject) {
       (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
     }
-    onUploaded();
   };
 
   return (
@@ -514,6 +526,7 @@ export default function AppHome() {
   const [accountFilled, setAccountFilled] = useState(false);
   const [activeKyc, setActiveKyc] = useState<KycStep>(null);
   const [kycUploaded, setKycUploaded] = useState<Record<string, boolean>>({});
+  const [kycFiles, setKycFiles] = useState<Record<string, File>>({});
 
   // Account form tracking
   const [accountFields, setAccountFields] = useState({ name: '', email: '', phone: '', dob: '', address: '', password: '', confirmPassword: '' });
@@ -1106,12 +1119,18 @@ export default function AppHome() {
                     <KycCard
                       doc={role.doc1} stepKey="doc1" activeStep={activeKyc} onToggle={setActiveKyc}
                       accentColor={role.accentColor} uploaded={!!kycUploaded['doc1']}
-                      onUploaded={() => setKycUploaded(prev => ({ ...prev, doc1: true }))}
+                      onUploaded={(file) => {
+                        setKycUploaded(prev => ({ ...prev, doc1: true }));
+                        if (file) setKycFiles(prev => ({ ...prev, doc1: file as File }));
+                      }}
                     />
                     <KycCard
                       doc={role.doc2} stepKey="doc2" activeStep={activeKyc} onToggle={setActiveKyc}
                       accentColor={role.accentColor} uploaded={!!kycUploaded['doc2']}
-                      onUploaded={() => setKycUploaded(prev => ({ ...prev, doc2: true }))}
+                      onUploaded={(file) => {
+                        setKycUploaded(prev => ({ ...prev, doc2: true }));
+                        if (file) setKycFiles(prev => ({ ...prev, doc2: file as File }));
+                      }}
                     />
                   </div>
                 )}
