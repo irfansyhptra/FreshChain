@@ -516,7 +516,7 @@ export default function AppHome() {
   const [kycUploaded, setKycUploaded] = useState<Record<string, boolean>>({});
 
   // Account form tracking
-  const [accountFields, setAccountFields] = useState({ name: '', email: '', phone: '', dob: '', address: '' });
+  const [accountFields, setAccountFields] = useState({ name: '', email: '', phone: '', dob: '', address: '', password: '', confirmPassword: '' });
 
   const role = selectedRole ? ROLES[selectedRole] : null;
   const c = selectedRole ? COLOR[role!.accentColor] : COLOR['emerald'];
@@ -531,7 +531,7 @@ export default function AppHome() {
   const handleAccountChange = (field: string, value: string) => {
     const updated = { ...accountFields, [field]: value };
     setAccountFields(updated);
-    const filled = updated.name.length > 2 && updated.email.includes('@') && updated.phone.length > 6 && updated.address.length > 5;
+    const filled = updated.name.length > 2 && updated.email.includes('@') && updated.phone.length > 6 && updated.address.length > 5 && updated.password.length >= 8 && updated.password === updated.confirmPassword;
     setAccountFilled(filled);
   };
 
@@ -1021,6 +1021,20 @@ export default function AppHome() {
                       </div>
                     ))}
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {[
+                      { l: 'Kata Sandi', t: 'password', p: 'Minimal 8 Karakter', f: 'password' },
+                      { l: 'Konfirmasi Kata Sandi', t: 'password', p: 'Konfirmasi Sandi', f: 'confirmPassword' }
+                    ].map(({ l, t, p, f }) => (
+                      <div key={l} className="bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 focus-within:border-emerald-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:shadow-sm transition-all">
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{l}</label>
+                        <input type={t} placeholder={p} className="w-full bg-transparent outline-none text-sm text-slate-900 font-semibold placeholder-slate-400"
+                          onChange={(e) => handleAccountChange(f, e.target.value)} />
+                      </div>
+                    ))}
+                  </div>
+
                   <div className="bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 focus-within:border-emerald-400 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10 focus-within:shadow-sm transition-all">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Alamat Lengkap</label>
                     <textarea rows={2} placeholder="Jl. Contoh No. 123, Kota, Provinsi" className="w-full bg-transparent outline-none text-sm text-slate-900 font-semibold placeholder-slate-400 resize-none"
@@ -1161,19 +1175,65 @@ export default function AppHome() {
                   Kembali
                 </button>
 
-                <Link href={kycComplete && role ? role.href : '#'}>
-                  <button
-                    disabled={!kycComplete}
-                    className={`relative flex items-center gap-2 px-7 py-2.5 font-bold text-sm text-white rounded-xl transition-all whitespace-nowrap
-                      bg-linear-to-r ${c.gradFrom} ${c.gradTo}
-                      ${kycComplete
-                        ? 'shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] opacity-100'
-                        : 'opacity-40 cursor-not-allowed saturate-50'}`}
-                  >
-                    Lanjutkan Pendaftaran
-                    <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-                  </button>
-                </Link>
+                <button
+                  onClick={async () => {
+                    if (!kycComplete) return;
+                    if (accountFields.password !== accountFields.confirmPassword) {
+                      alert("Kata Sandi dan Konfirmasi Kata Sandi tidak cocok.");
+                      return;
+                    }
+                    
+                    try {
+                      const formData = new FormData();
+                      
+                      // Append base account info
+                      const roleMap = { 'petani': 'Petani', 'investor': 'Investor', 'konsumen': 'Konsumen' };
+                      formData.append("role", roleMap[selectedRole!]);
+                      formData.append("name", accountFields.name || '');
+                      formData.append("email", accountFields.email || '');
+                      formData.append("phone", accountFields.phone || '');
+                      formData.append("dob", accountFields.dob || '');
+                      formData.append("address", accountFields.address || '');
+                      formData.append("password", accountFields.password || '');
+                      
+                      // Append Role-Specific KYC files
+                      if (selectedRole === 'petani') {
+                         formData.append("kycKTP", kycFiles['doc1'] || '');
+                         formData.append("kycLand", kycFiles['doc2'] || ''); 
+                      } else if (selectedRole === 'investor') {
+                         formData.append("kycInvestorDoc", kycFiles['doc1'] || '');
+                         formData.append("kycInvestorSelfie", kycFiles['doc2'] || '');
+                      } else if (selectedRole === 'konsumen') {
+                         formData.append("kyc", kycFiles['doc1'] || '');
+                         // For konsumen, use physical text references mapped nicely
+                         formData.append("deliveryAddress", accountFields.address || '');
+                      }
+
+                      let endpoint = `/api/auth/register/${selectedRole}`;
+                      
+                      const res = await fetch(endpoint, {
+                          method: "POST",
+                          body: formData,
+                      });
+
+                      const result = await res.json();
+                      if (!res.ok) throw new Error(result.error || "Gagal melakukan registrasi");
+
+                      window.location.href = role!.href;
+                    } catch (err: any) {
+                      alert(err.message || "Gagal terhubung.");
+                    }
+                  }}
+                  disabled={!kycComplete}
+                  className={`relative flex items-center gap-2 px-7 py-2.5 font-bold text-sm text-white rounded-xl transition-all whitespace-nowrap
+                    bg-linear-to-r ${c.gradFrom} ${c.gradTo}
+                    ${kycComplete
+                      ? 'shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] opacity-100'
+                      : 'opacity-40 cursor-not-allowed saturate-50'}`}
+                >
+                  Lanjutkan Pendaftaran
+                  <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </button>
               </div>
             </div>
           </div>

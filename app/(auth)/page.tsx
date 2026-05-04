@@ -5,9 +5,69 @@ import { Button } from "@/components/ui/Button";
 
 export default function RegisterPage() {
     const [selectedRole, setSelectedRole] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const handleRoleSelect = (role: string) => {
         setSelectedRole(role);
+    };
+
+    const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        try {
+            const formData = new FormData(e.currentTarget);
+            
+            const password = formData.get("password");
+            const confirmPassword = formData.get("confirmPassword");
+            
+            if (password !== confirmPassword) {
+                setError("Kata Sandi dan Konfirmasi Kata Sandi tidak cocok.");
+                setLoading(false);
+                return;
+            }
+
+            if (selectedRole) {
+                formData.append("role", selectedRole);
+            }
+
+            let endpoint = "";
+            if (selectedRole === "Petani") endpoint = "/api/auth/register/petani";
+            else if (selectedRole === "Investor") endpoint = "/api/auth/register/investor";
+            else if (selectedRole === "Konsumen") endpoint = "/api/auth/register/konsumen";
+            else throw new Error("Invalid role selected");
+
+            const res = await fetch(endpoint, {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Gagal melakukan registrasi");
+                setLoading(false);
+                return;
+            }
+
+            // Redirect automatically upon success registration
+            const r = data.user?.role?.toLowerCase();
+            if (r === "petani") {
+                window.location.href = "/petani/dashboard";
+            } else if (r === "investor") {
+                window.location.href = "/investor/dashboard";
+            } else if (r === "konsumen") {
+                window.location.href = "/marketplace";
+            } else {
+                window.location.href = "/";
+            }
+        } catch (err: any) {
+            console.error(err);
+            setError("Terjadi kesalahan jaringan.");
+            setLoading(false);
+        }
     };
 
     return (
@@ -53,7 +113,8 @@ export default function RegisterPage() {
 
                 {/* Optional: Show remaining steps if role is selected */}
                 {selectedRole && (
-                    <form className="space-y-8 animate-[slideUpFade_0.4s_ease_forwards]">
+                    <form className="space-y-8 animate-[slideUpFade_0.4s_ease_forwards]" onSubmit={handleRegister}>
+                        {error && <div className="p-4 bg-red-100 text-red-600 rounded-lg text-sm">{error}</div>}
                         {/* 2. Detail Akun */}
                         <div className={styles.card}>
                             <h2 className="text-xl font-bold text-slate-700 mb-2 font-plus">2. Detail Akun</h2>
@@ -62,38 +123,42 @@ export default function RegisterPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className={styles.formGroup}>
                                     <label htmlFor="name">Nama Lengkap (Sesuai Identitas)</label>
-                                    <input id="name" type="text" className={styles.input} placeholder="Contoh: Budi Santoso" required />
+                                    <input id="name" name="name" type="text" className={styles.input} placeholder="Contoh: Budi Santoso" required />
                                 </div>
 
                                 <div className={styles.formGroup}>
                                     <label htmlFor="email">Alamat Email</label>
-                                    <input id="email" type="email" className={styles.input} placeholder="budi@email.com" required />
+                                    <input id="email" name="email" type="email" className={styles.input} placeholder="budi@email.com" required />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className={styles.formGroup}>
                                     <label htmlFor="phone">Nomor HP / WhatsApp Aktif</label>
-                                    <input id="phone" type="tel" className={styles.input} placeholder="Contoh: 08123456789" required />
+                                    <input id="phone" name="phone" type="tel" className={styles.input} placeholder="Contoh: 08123456789" required />
                                 </div>
 
                                 <div className={styles.formGroup}>
                                     <label htmlFor="dob">Tanggal Lahir</label>
-                                    <input id="dob" type="date" className={styles.input} required />
+                                    <input id="dob" name="dob" type="date" className={styles.input} required />
                                 </div>
                             </div>
 
                             <div className="mt-4">
                                 <div className={styles.formGroup}>
                                     <label htmlFor="address">Alamat Lengkap</label>
-                                    <textarea id="address" className={styles.input} rows={2} placeholder="Masukkan alamat lengkap Anda..." required></textarea>
+                                    <textarea id="address" name="address" className={styles.input} rows={2} placeholder="Masukkan alamat lengkap Anda..." required></textarea>
                                 </div>
                             </div>
 
-                            <div className="mt-4">
+                            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className={styles.formGroup}>
                                     <label htmlFor="password">Kata Sandi</label>
-                                    <input id="password" type="password" className={styles.input} placeholder="Minimal 8 Karakter" required />
+                                    <input id="password" name="password" type="password" className={styles.input} placeholder="Minimal 8 Karakter" required minLength={8} />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="confirmPassword">Konfirmasi Kata Sandi</label>
+                                    <input id="confirmPassword" name="confirmPassword" type="password" className={styles.input} placeholder="Konfirmasi Kata Sandi" required minLength={8} />
                                 </div>
                             </div>
                         </div>
@@ -108,39 +173,39 @@ export default function RegisterPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className={styles.formGroup}>
                                             <label htmlFor="nik">NIK (Nomor Induk Kependudukan)</label>
-                                            <input id="nik" type="text" className={styles.input} placeholder="16 Digit NIK KTP" required maxLength={16} minLength={16} />
+                                            <input id="nik" name="nik" type="text" className={styles.input} placeholder="16 Digit NIK KTP" required maxLength={16} minLength={16} />
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label htmlFor="groupName">Nama Kelompok Tani (Opsional)</label>
-                                            <input id="groupName" type="text" className={styles.input} placeholder="Contoh: Tani Maju Bersama" />
+                                            <input id="groupName" name="groupName" type="text" className={styles.input} placeholder="Contoh: Tani Maju Bersama" />
                                         </div>
                                     </div>
 
                                     <div className={styles.formGroup}>
                                         <label htmlFor="location">Lokasi Lahan Detail</label>
-                                        <textarea id="location" className={styles.input} rows={2} placeholder="Sebutkan Dusun, Desa, Kecamatan, Kab/Kota" required></textarea>
+                                        <textarea id="location" name="location" className={styles.input} rows={2} placeholder="Sebutkan Dusun, Desa, Kecamatan, Kab/Kota" required></textarea>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className={styles.formGroup}>
                                             <label htmlFor="commodity">Komoditas Utama (Fokus Penanaman)</label>
-                                            <input id="commodity" type="text" className={styles.input} placeholder="Contoh: Padi, Kopi Arabika, Tomat" required />
+                                            <input id="commodity" name="commodity" type="text" className={styles.input} placeholder="Contoh: Padi, Kopi Arabika, Tomat" required />
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label htmlFor="area">Luas Lahan Produktif (Hektar/m²)</label>
-                                            <input id="area" type="number" step="0.01" className={styles.input} placeholder="Contoh: 2.5 Hektar" required />
+                                            <input id="area" name="area" type="number" step="0.01" className={styles.input} placeholder="Contoh: 2.5 Hektar" required />
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                                         <div className={styles.formGroup}>
                                             <label htmlFor="kycKTP">Unggah Foto KTP</label>
-                                            <input id="kycKTP" type="file" className={styles.input} accept="image/jpeg,image/png" required />
+                                            <input id="kycKTP" name="kycKTP" type="file" className={styles.input} accept="image/jpeg,image/png" required />
                                             <p className="text-xs text-slate-500 mt-1">Pastikan tulisan terbaca jelas tanpa pantulan cahaya.</p>
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label htmlFor="kycLand">Bukti Penguasaan Lahan (Sertifikat/Girik)</label>
-                                            <input id="kycLand" type="file" className={styles.input} accept="image/*,.pdf" required />
+                                            <input id="kycLand" name="kycLand" type="file" className={styles.input} accept="image/*,.pdf" required />
                                             <p className="text-xs text-slate-500 mt-1">Format PDF/JPG/PNG maks. 10MB</p>
                                         </div>
                                     </div>
@@ -152,18 +217,18 @@ export default function RegisterPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className={styles.formGroup}>
                                             <label htmlFor="nikPaspor">Nomor NIK / Paspor</label>
-                                            <input id="nikPaspor" type="text" className={styles.input} placeholder="No. Identitas Resmi" required />
+                                            <input id="nikPaspor" name="nikPaspor" type="text" className={styles.input} placeholder="No. Identitas Resmi" required />
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label htmlFor="npwp">Nomor NPWP</label>
-                                            <input id="npwp" type="text" className={styles.input} placeholder="00.000.000.0-000.000" required />
+                                            <input id="npwp" name="npwp" type="text" className={styles.input} placeholder="00.000.000.0-000.000" required />
                                         </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className={styles.formGroup}>
                                             <label htmlFor="income">Sumber Dana Investasi</label>
-                                            <select id="income" className={styles.input} required>
+                                            <select id="income" name="income" className={styles.input} required>
                                                 <option value="">Pilih Sumber Dana...</option>
                                                 <option value="Gaji">Gaji / Penghasilan Rutin</option>
                                                 <option value="Hasil Usaha">Keuntungan Hasil Usaha</option>
@@ -173,7 +238,7 @@ export default function RegisterPage() {
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label htmlFor="risk">Profil Risiko Investasi</label>
-                                            <select id="risk" className={styles.input} required>
+                                            <select id="risk" name="risk" className={styles.input} required>
                                                 <option value="">Pilih profil risiko...</option>
                                                 <option value="Konservatif">Konservatif (Cenderung Aman - Bunga Rendah)</option>
                                                 <option value="Moderat">Moderat (Risiko Menengah - Diversifikasi)</option>
@@ -185,11 +250,11 @@ export default function RegisterPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                                         <div className={styles.formGroup}>
                                             <label htmlFor="kycInvestorDoc">KTP / Paspor Resmi (Investor)</label>
-                                            <input id="kycInvestorDoc" type="file" className={styles.input} accept="image/jpeg,image/png,.pdf" required />
+                                            <input id="kycInvestorDoc" name="kycInvestorDoc" type="file" className={styles.input} accept="image/jpeg,image/png,.pdf" required />
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label htmlFor="kycInvestorSelfie">Swafoto Liveness / Selfie dengan KTP</label>
-                                            <input id="kycInvestorSelfie" type="file" className={styles.input} accept="image/jpeg,image/png" required />
+                                            <input id="kycInvestorSelfie" name="kycInvestorSelfie" type="file" className={styles.input} accept="image/jpeg,image/png" required />
                                         </div>
                                     </div>
                                 </>
@@ -198,28 +263,28 @@ export default function RegisterPage() {
                             {selectedRole === 'Konsumen' && (
                                 <>
                                     <div className={styles.formGroup}>
-                                        <label htmlFor="address">Alamat Pengiriman Utama (Default)</label>
-                                        <textarea id="address" className={styles.input} rows={3} placeholder="Nama Jalan, RT/RW, Patokan (Bila ada)..." required></textarea>
+                                        <label htmlFor="deliveryAddress">Alamat Pengiriman Utama (Default)</label>
+                                        <textarea id="deliveryAddress" name="deliveryAddress" className={styles.input} rows={3} placeholder="Nama Jalan, RT/RW, Patokan (Bila ada)..." required></textarea>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div className={styles.formGroup}>
                                             <label htmlFor="provinsi">Provinsi</label>
-                                            <input id="provinsi" type="text" className={styles.input} placeholder="Contoh: Jawa Barat" required />
+                                            <input id="provinsi" name="provinsi" type="text" className={styles.input} placeholder="Contoh: Jawa Barat" required />
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label htmlFor="kota">Kota/Kabupaten</label>
-                                            <input id="kota" type="text" className={styles.input} placeholder="Contoh: Kota Bandung" required />
+                                            <input id="kota" name="kota" type="text" className={styles.input} placeholder="Contoh: Kota Bandung" required />
                                         </div>
                                         <div className={styles.formGroup}>
                                             <label htmlFor="kodepos">Kode Pos</label>
-                                            <input id="kodepos" type="text" className={styles.input} placeholder="Contoh: 40123" required />
+                                            <input id="kodepos" name="kodepos" type="text" className={styles.input} placeholder="Contoh: 40123" required />
                                         </div>
                                     </div>
 
                                     <div className={`${styles.formGroup} mt-6`}>
                                         <label htmlFor="kyc">Upload Dokumen KYC (KTP)</label>
-                                        <input id="kyc" type="file" className={styles.input} accept="image/*,.pdf" required />
+                                        <input id="kyc" name="kyc" type="file" className={styles.input} accept="image/*,.pdf" required />
                                     </div>
                                 </>
                             )}
@@ -227,14 +292,14 @@ export default function RegisterPage() {
                             {/* Submit & TOC */}
                             <div className="mt-8 border-t border-slate-200/50 pt-6">
                                 <div className="mb-6 flex items-start gap-3">
-                                    <input type="checkbox" id="terms" className="mt-1 w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" required />
+                                    <input type="checkbox" id="terms" name="terms" className="mt-1 w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" required />
                                     <label htmlFor="terms" className="text-sm text-slate-600">
                                         Saya setuju dengan <a href="#" className="font-bold text-emerald-600 hover:text-emerald-700 transition">Syarat Layanan</a> dan <a href="#" className="font-bold text-emerald-600 hover:text-emerald-700 transition">Kebijakan Privasi</a> yang berlaku dalam jaringan FreshChain, termasuk konfirmasi keabsahan dokumen untuk validasi KYC Smart Contract.
                                     </label>
                                 </div>
 
-                                <Button type="submit" variant="primary" fullWidth className="!py-4 text-lg font-bold shadow-emerald-600/30" disabled={!selectedRole}>
-                                    {selectedRole === 'Konsumen' ? 'Verifikasi & Buat Akun' : 'Ajukan Verifikasi KYC & Daftar'}
+                                <Button type="submit" variant="primary" fullWidth className="!py-4 text-lg font-bold shadow-emerald-600/30" disabled={!selectedRole || loading}>
+                                    {loading ? 'Memproses...' : selectedRole === 'Konsumen' ? 'Verifikasi & Buat Akun' : 'Ajukan Verifikasi KYC & Daftar'}
                                 </Button>
                             </div>
                         </div>
