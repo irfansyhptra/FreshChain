@@ -1,13 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 import ActiveProjects from "@/components/dashboard/ActiveProjects";
 import LiveUpdates from "@/components/dashboard/LiveUpdates";
 
+type FarmerDashboardResponse = {
+  success: boolean;
+  data?: {
+    organizationName: string;
+    stats: {
+      totalFundingReceivedLabel: string;
+      fundingGrowthPercent: number;
+      activeProjects: number;
+      salesRevenueLabel: string;
+      salesLabel: string;
+    };
+  };
+};
+
 export default function FreshChainFarmerDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dashboardData, setDashboardData] = useState<FarmerDashboardResponse["data"]>();
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const res = await fetch('/api/petani/dashboard');
+      const json: FarmerDashboardResponse = await res.json();
+      if (json.success && json.data) {
+        setDashboardData(json.data);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <div className="bg-frosted-white text-slate-gray font-inter antialiased flex min-h-screen">
@@ -65,7 +92,7 @@ export default function FreshChainFarmerDashboard() {
         <header className="flex justify-between items-end mb-10 relative z-10">
           <div>
             <h2 className="text-2xl md:text-2xl md:text-3xl font-plus font-extrabold tracking-tight text-emerald-dark">Farmer Dashboard</h2>
-            <p className="text-slate-gray mt-1">Welcome back, Agro-Invest Primary Cooperative. Here is your farm's performance.</p>
+            <p className="text-slate-gray mt-1">Welcome back, {dashboardData?.organizationName ?? "Agro-Invest Primary Cooperative"}. Here is your farm&apos;s performance.</p>
           </div>
           <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-gradient-to-r from-emerald-main to-[#10B981] text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all">
             <span className="material-symbols-outlined">add_circle</span>
@@ -85,9 +112,9 @@ export default function FreshChainFarmerDashboard() {
               <span className="text-sm font-semibold text-slate-gray">Total Funding Received</span>
             </div>
             <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-emerald-dark">Rp 2.450.000.000</span>
+              <span className="text-2xl font-bold text-emerald-dark">{dashboardData?.stats.totalFundingReceivedLabel ?? "Rp 2.450.000.000"}</span>
               <span className="text-xs text-emerald-main font-bold mb-1 flex items-center">
-                <span className="material-symbols-outlined text-xs">trending_up</span> +12%
+                <span className="material-symbols-outlined text-xs">trending_up</span> +{dashboardData?.stats.fundingGrowthPercent ?? 12}%
               </span>
             </div>
           </div>
@@ -101,7 +128,7 @@ export default function FreshChainFarmerDashboard() {
               <span className="text-sm font-semibold text-slate-gray">Active Projects</span>
             </div>
             <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-emerald-dark">14 Projects</span>
+              <span className="text-2xl font-bold text-emerald-dark">{dashboardData?.stats.activeProjects ?? 14} Projects</span>
               <span className="text-xs text-slate-gray font-semibold mb-1">In progress</span>
             </div>
           </div>
@@ -115,9 +142,9 @@ export default function FreshChainFarmerDashboard() {
               <span className="text-sm font-semibold text-slate-gray">Sales Revenue</span>
             </div>
             <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-emerald-dark">Rp 892.400.000</span>
+              <span className="text-2xl font-bold text-emerald-dark">{dashboardData?.stats.salesRevenueLabel ?? "Rp 892.400.000"}</span>
               <span className="text-xs text-blockchain-blue font-bold mb-1 flex items-center">
-                <span className="material-symbols-outlined text-xs">arrow_upward</span> YTD
+                <span className="material-symbols-outlined text-xs">arrow_upward</span> {dashboardData?.stats.salesLabel ?? "YTD"}
               </span>
             </div>
           </div>
