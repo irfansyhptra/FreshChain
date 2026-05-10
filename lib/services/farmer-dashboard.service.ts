@@ -9,7 +9,23 @@ export async function getFarmerDashboardData() {
   const farmer = await Farmer.findOne({ role: 'petani' }).sort({ createdAt: -1 }).lean();
 
   if (!farmer) {
-    return null;
+    // Return empty structure instead of null to avoid 404 errors
+    return {
+      id: "new",
+      name: "Petani",
+      organizationName: "Petani",
+      location: "-",
+      product: "-",
+      stats: {
+        totalFundingReceived: 0,
+        totalFundingReceivedLabel: "Rp 0",
+        fundingGrowthPercent: 0,
+        activeProjects: 0,
+        salesRevenue: 0,
+        salesRevenueLabel: "Rp 0",
+        salesLabel: "-",
+      },
+    };
   }
 
   const stats = farmer.dashboardStats || {};

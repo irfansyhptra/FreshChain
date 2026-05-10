@@ -1,11 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+type Product = {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  unit: string;
+  category: string;
+  imageUrl?: string;
+  badge?: string;
+  farmerName: string;
+  farmerLocation: string;
+  status: string;
+};
+
+const CATEGORIES = ["Semua Produk", "Sayur Organik", "Buah Tropis", "Gandum & Biji", "Rempah & Bumbu", "Lainnya"];
+const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n);
+
 export default function MarketplacePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [activeCategory, setActiveCategory] = useState("Semua Produk");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchProducts = useCallback(async () => {
+    setLoadingProducts(true);
+    try {
+      const params = new URLSearchParams();
+      if (activeCategory !== "Semua Produk") params.set("category", activeCategory);
+      if (searchQuery) params.set("search", searchQuery);
+      const res = await fetch(`/api/marketplace?${params.toString()}`);
+      const json = await res.json();
+      if (json.success) setProducts(json.data);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, [activeCategory, searchQuery]);
+
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
   return (
     <div className="bg-frosted-white text-slate-gray font-inter min-h-screen relative overflow-x-hidden antialiased pb-24 lg:pb-0">
@@ -41,6 +79,8 @@ export default function MarketplacePage() {
               <input 
                 type="text" 
                 placeholder="Cari sayur & buah organik..." 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="bg-transparent border-none outline-none text-sm text-emerald-dark w-48 ml-2 placeholder:text-slate-400 focus:outline-none"
               />
             </div>
@@ -87,207 +127,92 @@ export default function MarketplacePage() {
             </div>
 
             <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              <button className="whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold bg-emerald-main text-white shadow-sm shadow-emerald-main/20">Semua Produk</button>
-              <button className="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white/60 backdrop-blur-md border border-white/50 text-slate-600 hover:bg-white hover:text-emerald-dark transition-all">Sayur Organik</button>
-              <button className="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white/60 backdrop-blur-md border border-white/50 text-slate-600 hover:bg-white hover:text-emerald-dark transition-all">Buah Tropis</button>
-              <button className="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white/60 backdrop-blur-md border border-white/50 text-slate-600 hover:bg-white hover:text-emerald-dark transition-all">Sertifikasi Rendah Karbon</button>
-              <button className="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-white/60 backdrop-blur-md border border-white/50 text-slate-600 hover:bg-white hover:text-emerald-dark transition-all">Gandum & Biji</button>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                    activeCategory === cat
+                      ? "bg-emerald-main text-white shadow-sm shadow-emerald-main/20"
+                      : "bg-white/60 backdrop-blur-md border border-white/50 text-slate-600 hover:bg-white hover:text-emerald-dark"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </section>
 
-          {/* Product Grid */}
+          {/* Product Grid - Dynamic */}
+          {loadingProducts ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} className="h-72 bg-white/70 rounded-3xl border border-white/50 animate-pulse" />
+              ))}
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-20 bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl">
+              <span className="material-symbols-outlined text-5xl text-slate-200 block mb-3">search_off</span>
+              <h3 className="font-bold text-slate-600 text-lg mb-1">Belum ada produk</h3>
+              <p className="text-slate-400 text-sm">Produk dari petani lokal akan segera tersedia di sini.</p>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            {/* Product Card 1: Cabai Merah */}
-            <Link href="/marketplace/cabai-merah" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full">
-              <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
-                <img 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="/buahCabai.jpeg" 
-                  alt="Cabai Merah" 
-                />
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-red-600 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
-                  Pedas Ekstra
-                </div>
-              </div>
-              <div className="px-3 pb-3 flex flex-col flex-1 h-full">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-lg font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Cabai Merah Segar</h3>
-                    <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[12px]">location_on</span>
-                      Garut, Jawa Barat
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-2">
-                    <span className="block text-lg font-extrabold text-emerald-main">Rp 45k</span>
-                    <span className="text-[10px] text-slate-400">per kg</span>
-                  </div>
-                </div>
-                
-                <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-red-50 flex items-center justify-center text-red-600 font-bold text-xs">
-                      PM
+            {products.map(p => (
+              <div key={p._id} className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full">
+                <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
+                  {p.imageUrl ? (
+                    <Image src={p.imageUrl} alt={p.name} fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width:768px) 100vw, 33vw" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="material-symbols-outlined text-5xl text-slate-200">image</span>
                     </div>
+                  )}
+                  {p.badge && (
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-emerald-700 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">{p.badge}</div>
+                  )}
+                  {p.stock === 0 && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-2xl">
+                      <span className="text-white font-extrabold text-sm bg-black/50 px-3 py-1 rounded-full">Stok Habis</span>
+                    </div>
+                  )}
+                </div>
+                <div className="px-3 pb-3 flex flex-col flex-1 h-full">
+                  <div className="flex justify-between items-start mb-2">
                     <div>
-                      <p className="text-[11px] font-bold text-slate-700">Petani Makmur</p>
-                      <div className="flex items-center text-[10px] text-amber-500 font-medium">
-                        <span className="material-symbols-outlined text-[12px] mr-0.5" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                        4.9 (120 ulasan)
+                      <h3 className="text-lg font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">{p.name}</h3>
+                      <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[12px]">location_on</span>
+                        {p.farmerLocation}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <span className="block text-lg font-extrabold text-emerald-main">Rp {fmt(p.price)}</span>
+                      <span className="text-[10px] text-slate-400">per {p.unit}</span>
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full border border-slate-200 bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                        {p.farmerName.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0,2)}
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-bold text-slate-700">{p.farmerName}</p>
+                        <p className="text-[10px] text-slate-400">{p.category}</p>
                       </div>
                     </div>
+                    <button onClick={(e) => { e.preventDefault(); }} className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors" disabled={p.stock === 0}>
+                      <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+                    </button>
                   </div>
-                  <button onClick={(e)=>{e.preventDefault();}} className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors">
-                    <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
-                  </button>
                 </div>
               </div>
-            </Link>
-
-            {/* Product Card 2: Jagung Manis */}
-            <Link href="/marketplace/jagung-manis" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full mt-0">
-              <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
-                <img 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="/buahJagung.jpg" 
-                  alt="Jagung Manis" 
-                />
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-yellow-600 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
-                  Organik
-                </div>
-              </div>
-              <div className="px-3 pb-3 flex flex-col flex-1 h-full">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-lg font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Jagung Manis Organik</h3>
-                    <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[12px]">location_on</span>
-                      Purwodadi, Jawa Tengah
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-2">
-                    <span className="block text-lg font-extrabold text-emerald-main">Rp 15k</span>
-                    <span className="text-[10px] text-slate-400">per kg</span>
-                  </div>
-                </div>
-                
-                <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-yellow-50 flex items-center justify-center text-yellow-600 font-bold text-xs">
-                      ST
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-bold text-slate-700">Sumber Tani</p>
-                      <div className="flex items-center text-[10px] text-amber-500 font-medium">
-                        <span className="material-symbols-outlined text-[12px] mr-0.5" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                        4.8 (85 ulasan)
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={(e)=>{e.preventDefault();}} className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors">
-                    <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
-                  </button>
-                </div>
-              </div>
-            </Link>
-
-            {/* Product Card 3: Tomat Merah (Normal Mobile & Desktop) */}
-            <Link href="/marketplace/tomat-merah" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full gap-4">
-              <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
-                <img 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="/buahTomat.jpg" 
-                  alt="Tomat Segar" 
-                />
-                <div className="absolute top-3 left-3 bg-red-100 text-red-800 text-[10px] border border-red-200 font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
-                  Pestisida Nol
-                </div>
-              </div>
-              <div className="px-3 pb-3 flex flex-col flex-1 h-full">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-xl font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Tomat Segar Pilihan</h3>
-                    <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[12px]">location_on</span>
-                      Lembang, Jawa Barat
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="block text-xl font-extrabold text-emerald-main">Rp 20k</span>
-                    <span className="text-[10px] text-slate-400">per kg</span>
-                  </div>
-                </div>
-
-                <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
-                      GL
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-700">Kebun Gayo Lestari</p>
-                      <div className="flex items-center text-[10px] text-amber-500 font-medium mt-0.5">
-                        <span className="material-symbols-outlined text-[12px] mr-1" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                        5.0 (342 ulasan)
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={(e)=>{e.preventDefault();}} className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors">
-                    <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
-                  </button>
-                </div>
-              </div>
-            </Link>
-
-            {/* Product Card 4: Timun */}
-            <Link href="/marketplace/timun" className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full gap-4">
-              <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
-                <img 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  src="/buahTimun.jpeg" 
-                  alt="Timun Hibrida" 
-                />
-                <div className="absolute top-3 left-3 bg-emerald-100 text-emerald-800 text-[10px] border border-emerald-200 font-extrabold uppercase px-2.5 py-1 rounded-full shadow-sm">
-                  Hidroponik
-                </div>
-              </div>
-              <div className="px-3 pb-3 flex flex-col flex-1 h-full">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-xl font-bold text-emerald-dark leading-tight group-hover:text-emerald-main transition-colors">Timun Hibrida Super</h3>
-                    <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[12px]">location_on</span>
-                      Cianjur, Jawa Barat
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="block text-xl font-extrabold text-emerald-main">Rp 12k</span>
-                    <span className="text-[10px] text-slate-400">per kg</span>
-                  </div>
-                </div>
-
-                <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full border border-slate-200 bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
-                      SB
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-700">Tani Subur</p>
-                      <div className="flex items-center text-[10px] text-amber-500 font-medium mt-0.5">
-                        <span className="material-symbols-outlined text-[12px] mr-1" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                        4.7 (215 ulasan)
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={(e)=>{e.preventDefault();}} className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors">
-                    <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
-                  </button>
-                </div>
-              </div>
-            </Link>
-
+            ))}
           </div>
+          )}
         </div>
+
+
 
         {/* Right Column Checkout Sidebar */}
         <aside className="lg:w-1/3 xl:w-1/4 mt-8 lg:mt-0">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -19,6 +20,12 @@ export default function RootLayout({
       </head>
       <body className="bg-living-canvas">
         {children}
+        {/* Midtrans Snap Sandbox Script */}
+        <Script
+          src="https://app.sandbox.midtrans.com/snap/snap.js"
+          strategy="lazyOnload"
+          data-client-key={process.env.MIDTRANS_CLIENT_KEY}
+        />
       </body>
     </html>
   );
