@@ -24,6 +24,9 @@ export const createTransaction = async (params: {
         customer_details: {
             first_name: params.firstName,
             email: params.email
+        },
+        callbacks: {
+            finish: `${process.env.NEXT_PUBLIC_APP_URL || 'https://freshchain.vercel.app'}/payment/finish`
         }
     };
 

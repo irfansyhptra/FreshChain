@@ -13,9 +13,14 @@ export default function PaymentFinishPage() {
                 <p className="text-gray-600 mb-6">
                     Terima kasih. Transaksi Anda telah berhasil diproses. Status pesanan Anda akan segera diperbarui.
                 </p>
-                <Link href="/" className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
-                    Kembali ke Beranda
-                </Link>
+                <div className="flex flex-col space-y-3">
+                    <Link href="/marketplace/orders" className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
+                        Kelola Pesanan
+                    </Link>
+                    <Link href="/marketplace" className="inline-block bg-gray-100 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+                        Kembali Belanja
+                    </Link>
+                </div>
             </div>
         </div>
     );
