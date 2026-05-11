@@ -4,6 +4,8 @@ import { Cart } from "@/lib/models/Cart";
 import { Order, type IOrder } from "@/lib/models/Order";
 import { Product } from "@/lib/models/Product";
 import { createMarketplaceTransaction } from "@/lib/services/midtrans.service";
+import { Transaction } from "@/lib/models/Transaction";
+import { TransactionService } from "@/lib/services/transaction.service";
 
 const SHIPPING_FEE = 15000;
 const PLATFORM_FEE = 0;
@@ -191,6 +193,25 @@ export async function createMarketplaceCheckout(input: MarketplaceCheckoutInput)
             stockReserved: true,
         });
 
+        // Also create a Transaction record for tracking
+        await TransactionService.createTransaction({
+            guestEmail: email,
+            products: orderProducts.map((item) => ({
+                productId: item.productId.toString(),
+                name: item.name,
+                imageUrl: item.imageUrl,
+                quantity: item.quantity,
+                price: item.price,
+            })),
+            subtotalAmount,
+            shippingFee: SHIPPING_FEE,
+            platformFee: PLATFORM_FEE,
+            totalAmount,
+            shippingAddress: { receiverName, phone, fullAddress },
+            cartSessionId: input.cartSessionId,
+            paymentReference: orderNumber,
+        });
+
         if (input.cartSessionId) {
             // Mark the cart as pending checkout so UI can reflect that payment is in progress
             await Cart.findOneAndUpdate(
@@ -289,6 +310,14 @@ export async function applyMarketplacePaymentNotification(notification: Midtrans
             await order.save();
         }
 
+        // Also update the Transaction payment status
+        await TransactionService.updatePaymentStatus(
+            notification.order_id,
+            "paid",
+            notification.payment_type,
+            notification.transaction_id
+        );
+
         if (order.cartSessionId) {
             await Cart.updateOne(
                 { sessionId: order.cartSessionId },
@@ -319,6 +348,20 @@ export async function applyMarketplacePaymentNotification(notification: Midtrans
         order.midtransTransactionId = notification.transaction_id;
         order.cancelledAt = order.cancelledAt || now;
         await order.save();
+
+        // Also update the Transaction payment status
+        const failedPaymentStatus = notification.transaction_status === "expire"
+            ? "expired"
+            : notification.transaction_status === "cancel"
+                ? "cancelled"
+                : "failed";
+
+        await TransactionService.updatePaymentStatus(
+            notification.order_id,
+            failedPaymentStatus as "failed" | "cancelled" | "expired",
+            notification.payment_type,
+            notification.transaction_id
+        );
 
         if (order.cartSessionId) {
             await Cart.updateOne(

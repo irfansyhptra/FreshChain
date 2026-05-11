@@ -27,11 +27,18 @@ export interface IKonsumenProfile {
     kycSelfieUrl?: string;
 }
 
+export interface IInvestorProfile {
+    nik?: string;
+    companyName?: string;
+    investmentExperience?: string;
+    kycIdUrl?: string;
+}
+
 export interface IUser extends Document {
     name: string;
     email: string;
     password?: string;
-    role: "Petani" | "Konsumen" | "Admin";
+    role: "Petani" | "Konsumen" | "Investor" | "Admin";
     dob?: Date;
     phone?: string;
     address?: string;
@@ -39,6 +46,9 @@ export interface IUser extends Document {
     
     petaniProfile?: IPetaniProfile;
     konsumenProfile?: IKonsumenProfile;
+    investorProfile?: IInvestorProfile;
+    
+    transactions?: mongoose.Types.ObjectId[]; // References to Transaction documents
     
     createdAt: Date;
     updatedAt: Date;
@@ -51,7 +61,7 @@ const UserSchema: Schema = new Schema({
     role: {
         type: String,
         required: true,
-        enum: ["Petani", "Konsumen", "Admin"]
+        enum: ["Petani", "Konsumen", "Investor", "Admin"]
     },
     dob: { type: Date },
     phone: { type: String },
@@ -87,6 +97,15 @@ const UserSchema: Schema = new Schema({
         kycDocUrl: String,
         kycSelfieUrl: String,
     },
+    
+    investorProfile: {
+        nik: String,
+        companyName: String,
+        investmentExperience: String,
+        kycIdUrl: String,
+    },
+    
+    transactions: [{ type: Schema.Types.ObjectId, ref: "Transaction" }],
     
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
