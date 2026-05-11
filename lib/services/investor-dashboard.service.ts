@@ -11,7 +11,7 @@ export async function getInvestorDashboardData() {
   // Find a konsumen user to get data for. In reality, this will come from session.
   const konsumen = await User.findOne({ role: "Konsumen" }).lean();
   
-  let investments = [];
+  let investments: any[] = [];
   if (konsumen) {
       investments = await Investment.find({ investorId: konsumen._id })
         .populate('campaignId', 'title targetAmount currentAmount bannerUrl investmentTerms status')

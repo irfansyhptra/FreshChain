@@ -300,45 +300,6 @@ export default function InvestorDashboardPage() {
                         </tr>
                       )}
                     </tbody>
-                        <td className="py-4 text-slate-500 font-medium">24 Okt 2024</td>
-                        <td className="py-4 font-extrabold text-emerald-main">+4.250.000</td>
-                        <td className="py-4 text-right pr-2">
-                          <span className="inline-flex py-1 px-2.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold uppercase tracking-wide">SUKSES</span>
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 last:border-0 hover:bg-white/50 transition-colors group">
-                        <td className="py-4 pl-2 font-bold text-slate-700">Jagung Manis Jatim</td>
-                        <td className="py-4 text-slate-500 font-medium">12 Okt 2024</td>
-                        <td className="py-4 font-extrabold text-emerald-main">+1.800.000</td>
-                        <td className="py-4 text-right pr-2">
-                          <span className="inline-flex py-1 px-2.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold uppercase tracking-wide">SUKSES</span>
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 last:border-0 hover:bg-white/50 transition-colors group">
-                        <td className="py-4 pl-2 font-bold text-slate-700">Cabai Organik Lembang</td>
-                        <td className="py-4 text-slate-500 font-medium">02 Okt 2024</td>
-                        <td className="py-4 font-extrabold text-slate-400">2.100.000</td>
-                        <td className="py-4 text-right pr-2">
-                          <span className="inline-flex py-1 px-2.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-extrabold uppercase tracking-wide">PENDING</span>
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 last:border-0 hover:bg-white/50 transition-colors group">
-                        <td className="py-4 pl-2 font-bold text-slate-700">Greenhouse Tomat III</td>
-                        <td className="py-4 text-slate-500 font-medium">28 Sep 2024</td>
-                        <td className="py-4 font-extrabold text-emerald-main">+3.500.000</td>
-                        <td className="py-4 text-right pr-2">
-                          <span className="inline-flex py-1 px-2.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold uppercase tracking-wide">SUKSES</span>
-                        </td>
-                      </tr>
-                      <tr className="border-b border-slate-100 last:border-0 hover:bg-white/50 transition-colors group">
-                        <td className="py-4 pl-2 font-bold text-slate-700">Tambak Udang Sidoarjo</td>
-                        <td className="py-4 text-slate-500 font-medium">15 Sep 2024</td>
-                        <td className="py-4 font-extrabold text-emerald-main">+12.000.000</td>
-                        <td className="py-4 text-right pr-2">
-                          <span className="inline-flex py-1 px-2.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-extrabold uppercase tracking-wide">SUKSES</span>
-                        </td>
-                      </tr>
-                    </tbody>
                   </table>
                 </div>
                 

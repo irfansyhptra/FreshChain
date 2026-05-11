@@ -1,11 +1,44 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function InvestorPortfolioPage() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("Aktif");
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/investor/dashboard");
+        const json = await res.json();
+        if (json.success) {
+          setData(json.data);
+        }
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const stats = data?.stats || {
+    portfolioValueLabel: "Rp 0",
+    roiReceivedLabel: "Rp 0",
+    averageAnnualYield: 0,
+    estimatedRunningROILabel: "Rp 0",
+    activeAssets: 0
+  };
+
+  const investments = data?.investments || [];
+  
+  const filteredInvestments = investments.filter((inv: any) => {
+    if (activeTab === "Semua") return true;
+    if (activeTab === "Aktif" && inv.status === "Active") return true;
+    if (activeTab === "Selesai" && inv.status !== "Active") return true;
+    return false;
+  });
 
   return (
     <div className="bg-frosted-white text-slate-gray font-inter min-h-screen relative overflow-x-hidden antialiased">
@@ -100,23 +133,23 @@ export default function InvestorPortfolioPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <p className="text-sm font-semibold text-slate-500 mb-1">Total Modal Diinvestasikan</p>
-                <h3 className="text-2xl font-extrabold text-slate-800 font-plus tracking-tight mb-2">Rp 737.620.000</h3>
+                <h3 className="text-2xl font-extrabold text-slate-800 font-plus tracking-tight mb-2">{stats.portfolioValueLabel}</h3>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-md">
-                  <span className="material-symbols-outlined text-[12px]">trending_up</span> 12 Proyek
+                  <span className="material-symbols-outlined text-[12px]">trending_up</span> {stats.activeAssets} Proyek
                 </div>
               </div>
               <div className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <p className="text-sm font-semibold text-slate-500 mb-1">Estimasi ROI Berjalan</p>
-                <h3 className="text-2xl font-extrabold text-blockchain-blue font-plus tracking-tight mb-2">Rp 94.300.000</h3>
+                <h3 className="text-2xl font-extrabold text-blockchain-blue font-plus tracking-tight mb-2">{stats.estimatedRunningROILabel}</h3>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-sky-600 bg-sky-50 w-fit px-2 py-0.5 rounded-md">
-                  <span className="material-symbols-outlined text-[12px]">schedule</span> Jatuh tempo thn ini
+                  <span className="material-symbols-outlined text-[12px]">schedule</span> Target Berjalan
                 </div>
               </div>
               <div className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <p className="text-sm font-semibold text-slate-500 mb-1">Rata-rata Yield Tahunan</p>
-                <h3 className="text-2xl font-extrabold text-emerald-main font-plus tracking-tight mb-2">12.8%</h3>
+                <h3 className="text-2xl font-extrabold text-emerald-main font-plus tracking-tight mb-2">{stats.averageAnnualYield}%</h3>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-md">
-                  <span className="material-symbols-outlined text-[12px]">check_circle</span> Di Atas Target
+                  <span className="material-symbols-outlined text-[12px]">check_circle</span> Rata Rata Total
                 </div>
               </div>
             </div>
@@ -152,164 +185,67 @@ export default function InvestorPortfolioPage() {
             {/* Portfolio List */}
             <div className="space-y-4 pb-10">
               
-              {/* Card 1 */}
-              <div className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(2,132,199,0.08)] transition-all">
-                <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-center">
-                  {/* Left: Image & Title */}
-                  <div className="flex gap-4 items-center w-full xl:w-1/3">
-                    <img 
-                      src="https://images.unsplash.com/photo-1592650073507-6c2e3ca914a8?auto=format&fit=crop&q=80&w=200&h=200" 
-                      alt="Cabai Lembang" 
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shadow-sm"
-                    />
-                    <div>
-                      <h4 className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight mb-1">Kebun Cabai Keriting Organik</h4>
-                      <p className="text-xs text-slate-500 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">location_on</span>
-                        Lembang, Jawa Barat
-                      </p>
-                      <span className="inline-block mt-2 px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-md text-[9px] font-extrabold uppercase tracking-wide">
-                        Berjalan (Bulan 2/4)
-                      </span>
-                    </div>
-                  </div>
+              {filteredInvestments.length > 0 ? (
+                filteredInvestments.map((inv: any) => (
+                  <div key={inv.id} className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(2,132,199,0.08)] transition-all">
+                    <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-center">
+                      {/* Left: Image & Title */}
+                      <div className="flex gap-4 items-center w-full xl:w-1/3">
+                        <img 
+                          src={inv.campaign?.imageUrl || "https://images.unsplash.com/photo-1592650073507-6c2e3ca914a8?auto=format&fit=crop&q=80&w=200&h=200"} 
+                          alt={inv.campaign?.title || "Campaign"} 
+                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shadow-sm"
+                        />
+                        <div>
+                          <h4 className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight mb-1">{inv.campaign?.title || "Proyek Tidak Diketahui"}</h4>
+                          <span className={`inline-block mt-2 px-2.5 py-1 ${inv.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-600 border-slate-200'} border rounded-md text-[9px] font-extrabold uppercase tracking-wide`}>
+                            {inv.status === 'Active' ? 'Berjalan' : inv.status}
+                          </span>
+                        </div>
+                      </div>
 
-                  {/* Middle: Stats */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full xl:w-auto flex-1 border-t xl:border-t-0 xl:border-l border-slate-100 pt-4 xl:pt-0 xl:pl-6">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Modal</p>
-                      <p className="text-sm sm:text-base font-extrabold text-slate-800">Rp 25.000.000</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Est. ROI</p>
-                      <p className="text-sm sm:text-base font-extrabold text-emerald-main">12.5%</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Jatuh Tempo</p>
-                      <p className="text-sm sm:text-base font-extrabold text-slate-800">12 Des 2024</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Progress</p>
-                      <p className="text-sm sm:text-base font-extrabold text-blue-600">50%</p>
-                    </div>
-                  </div>
+                      {/* Middle: Stats */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full xl:w-auto flex-1 border-t xl:border-t-0 xl:border-l border-slate-100 pt-4 xl:pt-0 xl:pl-6">
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Modal</p>
+                          <p className="text-sm sm:text-base font-extrabold text-slate-800">{inv.amountLabel}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Est. ROI</p>
+                          <p className="text-sm sm:text-base font-extrabold text-emerald-main">{inv.campaign?.roi || 0}%</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Jatuh Tempo</p>
+                          <p className="text-sm sm:text-base font-extrabold text-slate-800">
+                            {inv.campaign?.deadline ? new Date(inv.campaign.deadline).toLocaleDateString('id-ID') : '-'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Target / Sisa</p>
+                          <p className="text-sm sm:text-base font-extrabold text-blue-600">
+                            {inv.campaign?.targetAmount ? Math.round((inv.campaign.currentAmount / inv.campaign.targetAmount) * 100) : 0}%
+                          </p>
+                        </div>
+                      </div>
 
-                  {/* Right: Actions */}
-                  <div className="w-full xl:w-auto flex flex-row xl:flex-col gap-2 pt-4 xl:pt-0 border-t xl:border-t-0 border-slate-100 justify-end">
-                    <button className="flex-1 xl:w-32 bg-white border border-slate-200 text-slate-600 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-xs text-center shadow-sm">
-                      Detail
-                    </button>
-                    <button className="flex-1 xl:w-32 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100 font-bold py-2.5 rounded-xl transition-colors text-xs text-center">
-                      Unduh Laporan
-                    </button>
+                      {/* Right: Actions */}
+                      <div className="w-full xl:w-auto flex flex-row xl:flex-col gap-2 pt-4 xl:pt-0 border-t xl:border-t-0 border-slate-100 justify-end">
+                        <Link href={`/crowdfunding/${inv.campaign?.id || '#'}`} className="flex-1 xl:w-32 bg-white border border-slate-200 text-slate-600 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-xs text-center shadow-sm">
+                          Detail
+                        </Link>
+                        <button className="flex-1 xl:w-32 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100 font-bold py-2.5 rounded-xl transition-colors text-xs text-center">
+                          Unduh Laporan
+                        </button>
+                      </div>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-10 text-slate-500 bg-white/40 rounded-3xl border border-white/30">
+                  <span className="material-symbols-outlined text-[48px] opacity-20 mb-2">inbox</span>
+                  <p>Tidak ada investasi untuk ditampilkan.</p>
                 </div>
-              </div>
-
-              {/* Card 2 */}
-              <div className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-3xl p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(2,132,199,0.08)] transition-all">
-                <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-center">
-                  {/* Left: Image & Title */}
-                  <div className="flex gap-4 items-center w-full xl:w-1/3">
-                    <img 
-                      src="https://images.unsplash.com/photo-1629881180295-812e9b8979db?auto=format&fit=crop&q=80&w=200&h=200" 
-                      alt="Lettuce Hydroponic" 
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shadow-sm"
-                    />
-                    <div>
-                      <h4 className="text-base sm:text-lg font-extrabold text-slate-800 leading-tight mb-1">Modern Hydroponic Lettuce</h4>
-                      <p className="text-xs text-slate-500 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">location_on</span>
-                        Malang, Jawa Timur
-                      </p>
-                      <span className="inline-block mt-2 px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-md text-[9px] font-extrabold uppercase tracking-wide">
-                        Mendekati Panen (Bulan 3/3)
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Middle: Stats */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full xl:w-auto flex-1 border-t xl:border-t-0 xl:border-l border-slate-100 pt-4 xl:pt-0 xl:pl-6">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Modal</p>
-                      <p className="text-sm sm:text-base font-extrabold text-slate-800">Rp 12.000.000</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Est. ROI</p>
-                      <p className="text-sm sm:text-base font-extrabold text-emerald-main">9.2%</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Jatuh Tempo</p>
-                      <p className="text-sm sm:text-base font-extrabold text-slate-800">28 Okt 2024</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Progress</p>
-                      <p className="text-sm sm:text-base font-extrabold text-blue-600">95%</p>
-                    </div>
-                  </div>
-
-                  {/* Right: Actions */}
-                  <div className="w-full xl:w-auto flex flex-row xl:flex-col gap-2 pt-4 xl:pt-0 border-t xl:border-t-0 border-slate-100 justify-end">
-                    <button className="flex-1 xl:w-32 bg-white border border-slate-200 text-slate-600 font-bold py-2.5 rounded-xl hover:bg-slate-50 transition-colors text-xs text-center shadow-sm">
-                      Detail
-                    </button>
-                    <button className="flex-1 xl:w-32 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100 font-bold py-2.5 rounded-xl transition-colors text-xs text-center">
-                      Unduh Laporan
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-               {/* Card 3 (Completed) */}
-               {activeTab === "Semua" || activeTab === "Selesai" ? (
-                <div className="bg-white/40 backdrop-blur-md border border-white/30 rounded-3xl p-5 sm:p-6 shadow-sm opacity-80 transition-all">
-                  <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-center grayscale-[0.2]">
-                    <div className="flex gap-4 items-center w-full xl:w-1/3">
-                      <img 
-                        src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=200&h=200" 
-                        alt="Tambak Udang" 
-                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shadow-sm"
-                      />
-                      <div>
-                        <h4 className="text-base sm:text-lg font-extrabold text-slate-700 leading-tight mb-1">Kluster Bioflok A21</h4>
-                        <p className="text-xs text-slate-500 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[12px]">location_on</span>
-                          Sidoarjo, Jawa Timur
-                        </p>
-                        <span className="inline-block mt-2 px-2.5 py-1 bg-slate-200 text-slate-600 rounded-md text-[9px] font-extrabold uppercase tracking-wide flex items-center gap-1 w-fit">
-                          <span className="material-symbols-outlined text-[10px]">done_all</span> Selesai
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full xl:w-auto flex-1 border-t xl:border-t-0 xl:border-l border-slate-200 pt-4 xl:pt-0 xl:pl-6">
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Modal</p>
-                        <p className="text-sm sm:text-base font-extrabold text-slate-600">Rp 50.000.000</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Realized ROI</p>
-                        <p className="text-sm sm:text-base font-extrabold text-slate-600">14.1%</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Tgl Pencairan</p>
-                        <p className="text-sm sm:text-base font-extrabold text-slate-600">24 Okt 2024</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Profit Bersih</p>
-                        <p className="text-sm sm:text-base font-extrabold text-emerald-600">+ Rp 7.050.000</p>
-                      </div>
-                    </div>
-
-                    <div className="w-full xl:w-auto flex flex-row gap-2 pt-4 xl:pt-0 border-t xl:border-t-0 border-slate-200 justify-end">
-                      <button className="flex-1 xl:w-full bg-white border border-slate-200 text-slate-600 font-bold py-2.5 px-4 rounded-xl hover:bg-slate-50 transition-colors text-xs text-center shadow-sm">
-                        Laporan Final
-                      </button>
-                    </div>
-                  </div>
-                </div>
-               ) : null}
-
+              )}
             </div>
           </div>
         </main>
