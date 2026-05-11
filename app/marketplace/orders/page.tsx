@@ -30,7 +30,7 @@ interface Order {
 }
 
 export default function OrdersPage() {
-  const { cartItems, cartTotal, clearCart } = useCart();
+  const { cartItems, cartTotal, clearCart, updateQuantity } = useCart();
   const [activeTab, setActiveTab] = useState<OrderStatus>('pending');
   // Per-tab order cache: status -> Order[]
   const [ordersByStatus, setOrdersByStatus] = useState<Record<string, Order[]>>({
@@ -42,6 +42,35 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(false);
   const [userProfile, setUserProfile] = useState<any>({});
   const [fetchedTabs, setFetchedTabs] = useState<Set<string>>(new Set());
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const handleCheckoutSuccess = async (draft: Order) => {
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerEmail: userProfile.email || 'pelanggan@freshchain.id',
+          totalAmount: draft.totalAmount,
+          shippingAddress: draft.shippingAddress,
+          products: draft.products,
+          status: 'packed'
+        })
+      });
+      const json = await res.json();
+      if(json.success) {
+        clearCart();
+        setOrdersByStatus(prev => ({
+          ...prev,
+          packed: [json.data, ...(prev.packed || [])]
+        }));
+        setTabCounts(prev => ({ ...prev, packed: (prev.packed || 0) + 1 }));
+        setActiveTab('packed');
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  };
 
   // Load profile once
   useEffect(() => {
@@ -279,7 +308,20 @@ export default function OrdersPage() {
                         </div>
                         <div className="flex-1 flex flex-col justify-center">
                           <h4 className="text-base font-bold text-slate-800">{item.name}</h4>
-                          <p className="text-sm text-slate-500 mt-1 font-medium">{item.quantity} barang <span className="mx-1.5">•</span> {formatPrice(item.price)}</p>
+                          {order._id === 'draft-cart' ? (
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
+                                <button onClick={() => updateQuantity(item.productId, item.quantity - 1)} className="w-5 h-5 text-slate-500 hover:text-emerald-main flex items-center justify-center font-bold text-sm leading-none">-</button>
+                                <span className="font-semibold text-sm w-4 text-center text-slate-700">{item.quantity}</span>
+                                <button onClick={() => updateQuantity(item.productId, item.quantity + 1)} className="w-5 h-5 text-slate-500 hover:text-emerald-main flex items-center justify-center font-bold text-sm leading-none">+</button>
+                              </div>
+                              <button onClick={() => updateQuantity(item.productId, 0)} className="text-xs text-rose-500 hover:text-rose-600 font-medium">Hapus</button>
+                              <span className="mx-1 text-slate-300">•</span> 
+                              <span className="text-sm text-slate-500 font-medium">{formatPrice(item.price)} / item</span>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-slate-500 mt-1 font-medium">{item.quantity} barang <span className="mx-1.5">•</span> {formatPrice(item.price)}</p>
+                          )}
                         </div>
                         <div className="text-right flex flex-col justify-center pl-6 border-l border-slate-100 hidden sm:flex">
                           <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Total</p>
@@ -331,8 +373,7 @@ export default function OrdersPage() {
                                 if (data.token) {
                                   (window as any).snap.pay(data.token, {
                                     onSuccess: function () { 
-                                       clearCart(); 
-                                       window.location.href = '/payment/finish'; 
+                                       handleCheckoutSuccess(order);
                                     },
                                     onPending: function () { window.location.href = '/payment/unfinish'; },
                                     onError: function () { window.location.href = '/payment/error'; },
@@ -358,7 +399,9 @@ export default function OrdersPage() {
                         Beli Lagi
                       </button>
                     )}
-                    <button className="flex-1 sm:flex-none px-6 py-2.5 border border-slate-200 shadow-sm text-sm font-semibold rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-all hover:-translate-y-0.5">
+                    <button 
+                      onClick={() => setSelectedOrder(order)}
+                      className="flex-1 sm:flex-none px-6 py-2.5 border border-slate-200 shadow-sm text-sm font-semibold rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-all hover:-translate-y-0.5">
                       Lihat Rincian
                     </button>
                   </div>
@@ -387,6 +430,94 @@ export default function OrdersPage() {
           </div>
         )}
       </main>
+
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-100 p-6 flex justify-between items-center z-10">
+              <h3 className="text-xl font-bold text-slate-800">Rincian Pesanan</h3>
+              <button onClick={() => setSelectedOrder(null)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* Info Utama */}
+              <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm text-emerald-600 font-bold mb-0.5">#{selectedOrder.orderNumber}</p>
+                    <p className="text-xs text-slate-500">{new Date(selectedOrder.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 uppercase tracking-wider">
+                    {tabs.find(t => t.id === selectedOrder.status)?.label || selectedOrder.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Produk */}
+              <div>
+                <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-emerald-main">inventory_2</span>
+                  Produk yang Dibeli
+                </h4>
+                <div className="space-y-4">
+                  {selectedOrder.products?.map((item, idx) => (
+                    <div key={idx} className="flex gap-4 p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
+                      <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
+                      <div className="flex-1">
+                        <p className="font-bold text-slate-800 line-clamp-1">{item.name}</p>
+                        <p className="text-xs text-slate-500 mt-1">Petani: Mitra FreshChain</p>
+                        <p className="text-sm font-medium text-emerald-700 mt-1">{item.quantity} x {formatPrice(item.price)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-slate-800">{formatPrice(item.price * item.quantity)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Rincian Pembayaran */}
+              <div>
+                <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-emerald-main">receipt_long</span>
+                  Rincian Pembayaran
+                </h4>
+                <div className="bg-slate-50 p-5 rounded-xl space-y-3 text-sm">
+                  <div className="flex justify-between text-slate-600">
+                    <span>Subtotal Produk</span>
+                    <span className="font-medium text-slate-800">{formatPrice(selectedOrder.totalAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>Ongkos Kirim</span>
+                    <span className="font-medium text-slate-800">{formatPrice(15000)}</span>
+                  </div>
+                  <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
+                    <span className="font-bold text-slate-800">Total Pembayaran</span>
+                    <span className="text-lg font-extrabold text-emerald-main">{formatPrice(selectedOrder.totalAmount + 15000)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Info Pengiriman */}
+              <div>
+                <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-emerald-main">local_shipping</span>
+                  Info Pengiriman
+                </h4>
+                <div className="border border-slate-100 rounded-xl p-4">
+                  <p className="font-bold text-slate-800">{selectedOrder.shippingAddress.receiverName}</p>
+                  <p className="text-sm text-slate-500 my-1">{selectedOrder.shippingAddress.phone}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">{selectedOrder.shippingAddress.fullAddress}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

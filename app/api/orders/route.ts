@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         const newOrder = new Order({
             ...body,
             orderNumber,
-            status: "pending",
+            status: body.status || "pending",
             // Set default estimated arrival 3 days from now
             estimatedArrival: new Date(Date.now() + 3 * 86400000)
         });

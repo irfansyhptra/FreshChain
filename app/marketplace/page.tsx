@@ -24,7 +24,7 @@ const CATEGORIES = ["Semua Produk", "Sayur Organik", "Buah Tropis", "Gandum & Bi
 const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 
 export default function MarketplacePage() {
-  const { addToCart, cartItems, cartTotal, removeFromCart } = useCart();
+  const { addToCart, cartItems, cartTotal, removeFromCart, updateQuantity } = useCart();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -285,9 +285,13 @@ export default function MarketplacePage() {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-slate-800 line-clamp-1">{item.name}</p>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-3 mt-1">
                             <button onClick={() => removeFromCart(item.id)} className="text-xs text-rose-500 hover:text-rose-600">Hapus</button>
-                            <span className="text-xs text-emerald-main font-semibold">{item.quantity}x</span>
+                            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-md px-1.5 py-0.5">
+                              <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-slate-500 hover:text-emerald-main w-4 h-4 flex items-center justify-center font-bold leading-none">-</button>
+                              <span className="text-xs font-semibold text-slate-700 w-4 text-center">{item.quantity}</span>
+                              <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-slate-500 hover:text-emerald-main w-4 h-4 flex items-center justify-center font-bold leading-none">+</button>
+                            </div>
                           </div>
                         </div>
                       </div>
