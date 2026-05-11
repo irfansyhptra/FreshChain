@@ -20,11 +20,51 @@ type Product = {
   status: string;
 };
 
+type Profile = {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+};
+
+type SnapCallbacks = {
+  onSuccess?: (result?: unknown) => void;
+  onPending?: (result?: unknown) => void;
+  onError?: (result?: unknown) => void;
+  onClose?: () => void;
+};
+
+type WindowWithSnap = Window & typeof globalThis & {
+  snap?: {
+    pay: (token: string, callbacks: SnapCallbacks) => void;
+  };
+};
+
 const CATEGORIES = ["Semua Produk", "Sayur Organik", "Buah Tropis", "Gandum & Biji", "Rempah & Bumbu", "Lainnya"];
 const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n);
+const SHIPPING_FEE = 15000;
+const DEFAULT_PROFILE: Profile = {
+  name: "Pelanggan",
+  email: "pelanggan@freshchain.id",
+  phone: "081234567890",
+  address: "Jl. Merdeka No. 123, Kecamatan Sukamaju, Kota Jakarta Selatan, 12345",
+};
+
+const readStoredProfile = (): Profile => {
+  if (typeof window === "undefined") return DEFAULT_PROFILE;
+
+  const savedProfile = localStorage.getItem("freshchain_profile");
+  if (!savedProfile) return DEFAULT_PROFILE;
+
+  try {
+    return { ...DEFAULT_PROFILE, ...JSON.parse(savedProfile) };
+  } catch {
+    return DEFAULT_PROFILE;
+  }
+};
 
 export default function MarketplacePage() {
-  const { addToCart, cartItems, cartTotal, removeFromCart, updateQuantity } = useCart();
+  const { addToCart, cartItems, cartTotal, removeFromCart, updateQuantity, clearCart, cartSessionId } = useCart();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -33,19 +73,9 @@ export default function MarketplacePage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [orderQuantity, setOrderQuantity] = useState(1);
-  const [shippingAddress, setShippingAddress] = useState("");
-
-  useEffect(() => {
-    // Load default address from profile on mount
-    const savedProfile = localStorage.getItem("freshchain_profile");
-    if (savedProfile) {
-      const parsed = JSON.parse(savedProfile);
-      if (parsed.address) setShippingAddress(parsed.address);
-    } else {
-      // Set to default placeholder profile if nothing exists
-      setShippingAddress("Jl. Merdeka No. 123, Kecamatan Sukamaju, Kota Jakarta Selatan, 12345");
-    }
-  }, []);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [userProfile] = useState<Profile>(readStoredProfile);
+  const [shippingAddress, setShippingAddress] = useState(() => readStoredProfile().address);
 
   const fetchProducts = useCallback(async () => {
     setLoadingProducts(true);
@@ -61,7 +91,63 @@ export default function MarketplacePage() {
     }
   }, [activeCategory, searchQuery]);
 
+  // Existing data fetch pattern: fetchProducts owns the loading/data state updates.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  const startMarketplaceCheckout = async (
+    items: Array<{ productId: string; quantity: number }>,
+    options: { clearLocalCartOnSuccess: boolean; cartSessionId?: string } = { clearLocalCartOnSuccess: false }
+  ) => {
+    if (items.length === 0) return alert("Keranjang masih kosong");
+    if (!shippingAddress.trim()) return alert("Mohon isi alamat pengiriman dengan lengkap");
+    const snap = (window as WindowWithSnap).snap;
+    if (!snap) return alert("Midtrans Snap belum siap. Coba beberapa detik lagi.");
+
+    setCheckoutLoading(true);
+    try {
+      const response = await fetch('/api/marketplace/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartSessionId: options.cartSessionId,
+          customerEmail: userProfile.email || DEFAULT_PROFILE.email,
+          shippingAddress: {
+            receiverName: userProfile.name || DEFAULT_PROFILE.name,
+            phone: userProfile.phone || DEFAULT_PROFILE.phone,
+            fullAddress: shippingAddress,
+          },
+          items,
+        }),
+      });
+      const json = await response.json();
+      if (!response.ok || !json.success) {
+        throw new Error(json.message || "Gagal membuat checkout");
+      }
+
+      localStorage.setItem('freshchain_pending_checkout', JSON.stringify({
+        orderNumber: json.data.orderNumber,
+        cartSessionId: options.cartSessionId,
+        shouldClearCart: options.clearLocalCartOnSuccess,
+      }));
+
+      snap.pay(json.data.token, {
+        onSuccess: function () {
+          if (options.clearLocalCartOnSuccess) clearCart();
+          window.location.href = '/marketplace/orders?tab=packed';
+        },
+        onPending: function () { window.location.href = '/payment/unfinish'; },
+        onError: function () { window.location.href = '/payment/error'; },
+        onClose: function () { alert('Anda menutup popup sebelum menyelesaikan pembayaran'); },
+      });
+      setIsOrderModalOpen(false);
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : 'Gagal membuat transaksi');
+      console.error(e);
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
   return (
     <div className="bg-frosted-white text-slate-gray font-inter min-h-screen relative overflow-x-hidden antialiased pb-24 lg:pb-0">
@@ -276,9 +362,8 @@ export default function MarketplacePage() {
                     <div key={item.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-100 overflow-hidden relative">
-                           {/* Using any for index signature since CartItem lacks imageUrl natively without extension */}
-                          {(item as any).imageUrl ? (
-                            <Image src={(item as any).imageUrl} alt={item.name} fill sizes="48px" className="object-cover" />
+                          {item.imageUrl ? (
+                            <Image src={item.imageUrl} alt={item.name} fill sizes="48px" className="object-cover" />
                           ) : (
                             <span className="material-symbols-outlined text-slate-400">image</span>
                           )}
@@ -306,43 +391,24 @@ export default function MarketplacePage() {
                     <span className="font-semibold text-slate-700">Rp {fmt(cartTotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Biaya Platform</span>
-                    <span className="font-semibold text-slate-700">Rp 1.000</span>
+                    <span className="text-slate-500">Ongkos Kirim</span>
+                    <span className="font-semibold text-slate-700">Rp {fmt(SHIPPING_FEE)}</span>
               </div>
               <div className="flex justify-between text-lg mt-2 pt-2 border-t border-slate-100">
                 <span className="font-bold text-emerald-dark">Total</span>
-                <span className="font-extrabold text-emerald-main">Rp {fmt(cartTotal + 1000)}</span>
+                <span className="font-extrabold text-emerald-main">Rp {fmt(cartTotal + SHIPPING_FEE)}</span>
               </div>
             </div>
 
             <button 
-              onClick={async () => {
-                try {
-                  const response = await fetch('/api/midtrans/transaction', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      amount: cartTotal + 1000,
-                      firstName: 'Pelanggan',
-                      email: 'pelanggan@freshchain.id'
-                    })
-                  });
-                  const data = await response.json();
-                  if(data.token) {
-                    (window as any).snap.pay(data.token, {
-                      onSuccess: function (result: any) { window.location.href = '/payment/finish'; },
-                      onPending: function (result: any) { window.location.href = '/payment/unfinish'; },
-                      onError: function (result: any) { window.location.href = '/payment/error'; },
-                      onClose: function () { alert('Anda menutup popup sebelum menyelesaikan pembayaran'); }
-                    });
-                  }
-                } catch(e) {
-                  alert('Gagal membuat transaksi');
-                }
-              }}
+              disabled={checkoutLoading || !cartSessionId}
+              onClick={() => startMarketplaceCheckout(
+                cartItems.map((item) => ({ productId: String(item.id), quantity: item.quantity })),
+                { clearLocalCartOnSuccess: true, cartSessionId }
+              )}
               className="w-full bg-gradient-to-r from-emerald-main to-[#10B981] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-main/20 hover:opacity-90 active:scale-95 transition-all text-sm flex justify-center items-center gap-2"
             >
-              Bayar Sekarang
+              {checkoutLoading ? 'Memproses...' : 'Bayar Sekarang'}
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </button>
             </>
@@ -408,11 +474,11 @@ export default function MarketplacePage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Ongkos Kirim (Flat)</span>
-                  <span className="font-semibold text-slate-700">Rp 15.000</span>
+                  <span className="font-semibold text-slate-700">Rp {fmt(SHIPPING_FEE)}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-slate-200 mt-2 font-bold text-lg text-emerald-dark">
                   <span>Total Tagihan</span>
-                  <span>Rp {fmt((selectedProduct.price * orderQuantity) + 15000)}</span>
+                  <span>Rp {fmt((selectedProduct.price * orderQuantity) + SHIPPING_FEE)}</span>
                 </div>
               </div>
             </div>
@@ -421,7 +487,7 @@ export default function MarketplacePage() {
               <button 
                 onClick={() => {
                   for(let i=0; i<orderQuantity; i++) {
-                     addToCart({id: selectedProduct._id, name: selectedProduct.name, price: selectedProduct.price, imageUrl: selectedProduct.imageUrl} as any);
+                     addToCart({id: selectedProduct._id, name: selectedProduct.name, price: selectedProduct.price, imageUrl: selectedProduct.imageUrl});
                   }
                   setIsOrderModalOpen(false);
                   window.location.href = '/marketplace/orders';
@@ -432,36 +498,14 @@ export default function MarketplacePage() {
                 Masuk Keranjang
               </button>
               <button 
-                onClick={async () => {
-                   if (!shippingAddress) return alert("Mohon isi alamat pengiriman dengan lengkap");
-                   try {
-                      const total = (selectedProduct.price * orderQuantity) + 15000;
-                      const response = await fetch('/api/midtrans/transaction', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          amount: total,
-                          firstName: 'Pelanggan',
-                          email: 'pelanggan@freshchain.id'
-                        })
-                      });
-                      const data = await response.json();
-                      if(data.token) {
-                        (window as any).snap.pay(data.token, {
-                          onSuccess: function (result: any) { window.location.href = '/payment/finish'; },
-                          onPending: function (result: any) { window.location.href = '/payment/unfinish'; },
-                          onError: function (result: any) { window.location.href = '/payment/error'; },
-                          onClose: function () { alert('Anda menutup popup sebelum menyelesaikan pembayaran'); }
-                        });
-                        setIsOrderModalOpen(false);
-                      }
-                   } catch (e) {
-                      console.error(e);
-                   }
-                }}
+                disabled={checkoutLoading}
+                onClick={() => startMarketplaceCheckout(
+                  [{ productId: selectedProduct._id, quantity: orderQuantity }],
+                  { clearLocalCartOnSuccess: false }
+                )}
                 className="flex-1 py-3 px-4 bg-emerald-main text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors shadow-md flex items-center justify-center gap-2"
               >
-                Bayar Sekarang
+                {checkoutLoading ? 'Memproses...' : 'Bayar Sekarang'}
               </button>
             </div>
           </div>
@@ -470,27 +514,27 @@ export default function MarketplacePage() {
 
       {/* Bottom Nav for Mobile */}
       <nav className="lg:hidden fixed bottom-0 w-full bg-white/80 backdrop-blur-xl border-t border-slate-200 flex items-center justify-around py-3 pb-safe-area-inset-bottom z-50 shadow-[0_-4px_20px_rgb(0,0,0,0.05)]">
-        <a href="/marketplace" className="flex flex-col items-center gap-1 text-emerald-main">
+        <Link href="/marketplace" className="flex flex-col items-center gap-1 text-emerald-main">
           <span className="material-symbols-outlined text-[24px]" style={{fontVariationSettings: "'FILL' 1"}}>storefront</span>
           <span className="text-[10px] font-bold">Shop</span>
-        </a>
-        <a href="/crowdfunding" className="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-main transition-colors">
+        </Link>
+        <Link href="/crowdfunding" className="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-main transition-colors">
           <span className="material-symbols-outlined text-[24px]">agriculture</span>
           <span className="text-[10px] font-semibold">Proyek</span>
-        </a>
-        <a href="/traceability" className="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-main transition-colors relative -top-4">
+        </Link>
+        <Link href="/traceability" className="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-main transition-colors relative -top-4">
           <div className="bg-gradient-to-r from-emerald-main to-[#10B981] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-emerald-main/30 active:scale-95 transition-transform border-4 border-frosted-white">
             <span className="material-symbols-outlined text-[28px]">qr_code_scanner</span>
           </div>
-        </a>
-        <a href="/petani/dashboard" className="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-main transition-colors">
+        </Link>
+        <Link href="/petani/dashboard" className="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-main transition-colors">
           <span className="material-symbols-outlined text-[24px]">dashboard</span>
           <span className="text-[10px] font-semibold">Panel</span>
-        </a>
-        <a href="/petani/wallet" className="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-main transition-colors">
+        </Link>
+        <Link href="/petani/wallet" className="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-main transition-colors">
           <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
           <span className="text-[10px] font-semibold">Wallet</span>
-        </a>
+        </Link>
       </nav>
 
       {/* Success Modal Overlay */}

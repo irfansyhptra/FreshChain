@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifySignature } from '@/lib/services/midtrans.service';
-// You might need to import your db/repository based on your exact app structure
-// import clientPromise from '@/lib/mongodb/client';
-// import { Order } from '@/lib/models/Order';
-// import { Investment } from '@/lib/models/Investment';
+import { applyMarketplacePaymentNotification } from '@/lib/services/marketplace-checkout.service';
 
 export async function POST(req: Request) {
     try {
@@ -22,7 +19,12 @@ export async function POST(req: Request) {
         } = body;
 
         // 1. Verify the signature to ensure request came from Midtrans
-        const signatureMatch = verifySignature(order_id, status_code, gross_amount, signature_key);
+        const signatureMatch = verifySignature(
+            String(order_id),
+            String(status_code),
+            String(gross_amount),
+            String(signature_key)
+        );
         
         if (!signatureMatch) {
             return NextResponse.json({ error: 'Invalid signature key' }, { status: 400 });
@@ -30,7 +32,21 @@ export async function POST(req: Request) {
 
         console.log(`Verifying Midtrans Callback for Order ID: ${order_id}`);
         
-        // 2. Process based on transaction status
+        const marketplaceResult = await applyMarketplacePaymentNotification({
+            order_id,
+            transaction_status,
+            fraud_status,
+            payment_type,
+            transaction_id,
+            settlement_time
+        });
+
+        if (marketplaceResult.handled) {
+            console.log(`Marketplace order ${order_id} updated from Midtrans status ${transaction_status}`);
+            return NextResponse.json({ status: 'OK' }, { status: 200 });
+        }
+
+        // 2. Process non-marketplace transactions based on transaction status
         if (transaction_status == 'capture') {
             if (fraud_status == 'challenge') {
                 // Update order status to challenge

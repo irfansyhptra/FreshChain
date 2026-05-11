@@ -7,6 +7,7 @@ export interface CartItem {
     name: string;
     price: number;
     quantity: number;
+    imageUrl?: string;
 }
 
 interface CartContextType {
@@ -17,29 +18,135 @@ interface CartContextType {
     clearCart: () => void;
     cartCount: number;
     cartTotal: number;
+    cartSessionId: string;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+const CART_STORAGE_KEY = 'freshchain_cart';
+const CART_SESSION_STORAGE_KEY = 'freshchain_cart_session';
+
+type ServerCartItem = {
+    productId?: string | number;
+    id?: string | number;
+    name?: string;
+    price?: number;
+    quantity?: number;
+    imageUrl?: string;
+};
+
+const createSessionId = () => {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+        return crypto.randomUUID();
+    }
+
+    return `cart-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+const getOrCreateCartSessionId = () => {
+    if (typeof window === 'undefined') return '';
+
+    const existingSessionId = localStorage.getItem(CART_SESSION_STORAGE_KEY);
+    if (existingSessionId) return existingSessionId;
+
+    const sessionId = createSessionId();
+    localStorage.setItem(CART_SESSION_STORAGE_KEY, sessionId);
+    return sessionId;
+};
+
+const readLocalCart = (): CartItem[] => {
+    if (typeof window === 'undefined') return [];
+
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+    if (!savedCart) return [];
+
+    try {
+        return JSON.parse(savedCart);
+    } catch (e) {
+        console.error('Failed to parse cart from local storage', e);
+        return [];
+    }
+};
+
+const mapServerItems = (items: ServerCartItem[] = []): CartItem[] => items.map((item) => ({
+    id: String(item.productId || item.id),
+    name: String(item.name || ''),
+    price: Number(item.price),
+    quantity: Number(item.quantity),
+    imageUrl: item.imageUrl || undefined,
+})).filter((item) => item.id && item.name && item.quantity > 0);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [cartSessionId] = useState(getOrCreateCartSessionId);
+    const [hydrated, setHydrated] = useState(false);
     
-    // Load from local storage on mount
+    // Load from local storage and reconcile with the server cart on mount.
     useEffect(() => {
-        const savedCart = localStorage.getItem('freshchain_cart');
-        if (savedCart) {
-            try {
-                setCartItems(JSON.parse(savedCart));
-            } catch (e) {
-                console.error('Failed to parse cart from local storage', e);
-            }
-        }
-    }, []);
+        if (!cartSessionId) return;
+        let cancelled = false;
 
-    // Save to local storage on cart change
+        const loadCart = async (initialItems: CartItem[]) => {
+            try {
+                const res = await fetch(`/api/cart?sessionId=${encodeURIComponent(cartSessionId)}`);
+                const json = await res.json();
+                const serverCart = json.success ? json.data : null;
+
+                if (cancelled) return;
+
+                if (serverCart?.status === 'checked_out') {
+                    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify([]));
+                    setCartItems([]);
+                    return;
+                }
+
+                if (initialItems.length === 0 && serverCart?.items?.length > 0) {
+                    setCartItems(mapServerItems(serverCart.items));
+                }
+            } catch (e) {
+                console.error('Failed to load cart from server', e);
+            } finally {
+                if (!cancelled) setHydrated(true);
+            }
+        };
+
+        queueMicrotask(() => {
+            if (cancelled) return;
+
+            const initialItems = readLocalCart();
+            if (initialItems.length > 0) setCartItems(initialItems);
+            loadCart(initialItems);
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [cartSessionId]);
+
+    // Save to local storage and sync the active cart snapshot to MongoDB.
     useEffect(() => {
-        localStorage.setItem('freshchain_cart', JSON.stringify(cartItems));
-    }, [cartItems]);
+        if (!hydrated) return;
+
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+
+        if (!cartSessionId) return;
+
+        fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: cartSessionId,
+                items: cartItems.map((item) => ({
+                    productId: item.id,
+                    name: item.name,
+                    imageUrl: item.imageUrl,
+                    quantity: item.quantity,
+                    price: item.price,
+                })),
+            }),
+        }).catch((e) => {
+            console.error('Failed to sync cart to server', e);
+        });
+    }, [cartItems, cartSessionId, hydrated]);
 
     const addToCart = (item: Omit<CartItem, 'quantity'>) => {
         setCartItems(prev => {
@@ -69,6 +176,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const clearCart = () => {
         setCartItems([]);
+        if (!cartSessionId) return;
+
+        fetch(`/api/cart?sessionId=${encodeURIComponent(cartSessionId)}`, {
+            method: 'DELETE',
+        }).catch((e) => {
+            console.error('Failed to clear cart on server', e);
+        });
     };
 
     const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -82,7 +196,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             updateQuantity,
             clearCart,
             cartCount,
-            cartTotal
+            cartTotal,
+            cartSessionId
         }}>
             {children}
         </CartContext.Provider>

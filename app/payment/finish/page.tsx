@@ -1,6 +1,31 @@
+"use client";
+
 import Link from 'next/link';
+import { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCart } from '@/components/CartContext';
 
 export default function PaymentFinishPage() {
+    const router = useRouter();
+    const { clearCart } = useCart();
+    const redirectedRef = useRef(false);
+
+    useEffect(() => {
+        if (redirectedRef.current) return;
+        const pendingCheckout = localStorage.getItem('freshchain_pending_checkout');
+        if (!pendingCheckout) return;
+
+        redirectedRef.current = true;
+        try {
+            const pending = JSON.parse(pendingCheckout);
+            if (pending.shouldClearCart) clearCart();
+        } catch {
+            clearCart();
+        }
+
+        router.replace('/marketplace/orders?tab=packed');
+    }, [clearCart, router]);
+
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
             <div className="bg-white p-8 rounded-2xl shadow-sm text-center max-w-md w-full">

@@ -1,8 +1,39 @@
 import midtransClient from 'midtrans-client';
 import crypto from 'crypto';
 
-// Use type assertion to avoid TypeScript errors since we don't have types for midtrans-client
-const midtrans = midtransClient as any;
+type MidtransTransactionParams = {
+    transaction_details: {
+        order_id: string;
+        gross_amount: number;
+    };
+    customer_details: {
+        first_name: string;
+        email: string;
+        phone?: string;
+    };
+    callbacks: {
+        finish: string;
+    };
+};
+
+type MidtransTransactionResponse = {
+    token: string;
+    redirect_url: string;
+};
+
+type MidtransSnap = {
+    createTransaction: (params: MidtransTransactionParams) => Promise<MidtransTransactionResponse>;
+};
+
+type MidtransClientModule = {
+    Snap: new (config: {
+        isProduction: boolean;
+        serverKey: string;
+        clientKey: string;
+    }) => MidtransSnap;
+};
+
+const midtrans = midtransClient as MidtransClientModule;
 
 export const snap = new midtrans.Snap({
     isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
@@ -27,6 +58,32 @@ export const createTransaction = async (params: {
         },
         callbacks: {
             finish: `${process.env.NEXT_PUBLIC_APP_URL || 'https://freshchain.vercel.app'}/payment/finish`
+        }
+    };
+
+    return snap.createTransaction(parameter);
+};
+
+export const createMarketplaceTransaction = async (params: {
+    orderId: string;
+    grossAmount: number;
+    firstName: string;
+    email: string;
+    phone?: string;
+}) => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://freshchain.vercel.app";
+    const parameter = {
+        transaction_details: {
+            order_id: params.orderId,
+            gross_amount: params.grossAmount
+        },
+        customer_details: {
+            first_name: params.firstName,
+            email: params.email,
+            phone: params.phone
+        },
+        callbacks: {
+            finish: `${appUrl}/payment/finish?order_id=${encodeURIComponent(params.orderId)}`
         }
     };
 

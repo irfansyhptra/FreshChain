@@ -6,6 +6,26 @@ import { useCart } from "@/components/CartContext";
 
 type OrderStatus = 'pending' | 'paid' | 'packed' | 'shipped' | 'completed';
 
+type Profile = {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+};
+
+type SnapCallbacks = {
+  onSuccess?: (result?: unknown) => void;
+  onPending?: (result?: unknown) => void;
+  onError?: (result?: unknown) => void;
+  onClose?: () => void;
+};
+
+type WindowWithSnap = Window & typeof globalThis & {
+  snap?: {
+    pay: (token: string, callbacks: SnapCallbacks) => void;
+  };
+};
+
 interface OrderProduct {
   productId: string;
   name: string;
@@ -18,6 +38,9 @@ interface Order {
   _id: string;
   orderNumber: string;
   totalAmount: number;
+  subtotalAmount?: number;
+  shippingFee?: number;
+  platformFee?: number;
   status: OrderStatus;
   products: OrderProduct[]; // DB field name
   createdAt: string;
@@ -29,9 +52,39 @@ interface Order {
   };
 }
 
+const SHIPPING_FEE = 15000;
+const DEFAULT_PROFILE: Profile = {
+  name: "Ahmad Budi",
+  email: "pengguna@freshchain.id",
+  phone: "081234567890",
+  address: "Jl. Merdeka No. 123, Kecamatan Sukamaju, Kota Jakarta Selatan, 12345"
+};
+
+const readStoredProfile = (): Profile => {
+  if (typeof window === "undefined") return DEFAULT_PROFILE;
+
+  const savedProfileStr = localStorage.getItem("freshchain_profile");
+  if (!savedProfileStr) return DEFAULT_PROFILE;
+
+  try {
+    return { ...DEFAULT_PROFILE, ...JSON.parse(savedProfileStr) };
+  } catch {
+    return DEFAULT_PROFILE;
+  }
+};
+
+const readInitialTab = (): OrderStatus => {
+  if (typeof window === "undefined") return "pending";
+
+  const requestedTab = new URLSearchParams(window.location.search).get('tab') as OrderStatus | null;
+  return requestedTab && ['pending', 'packed', 'shipped', 'completed'].includes(requestedTab)
+    ? requestedTab
+    : "pending";
+};
+
 export default function OrdersPage() {
-  const { cartItems, cartTotal, clearCart, updateQuantity } = useCart();
-  const [activeTab, setActiveTab] = useState<OrderStatus>('pending');
+  const { cartItems, cartTotal, clearCart, updateQuantity, cartSessionId } = useCart();
+  const [activeTab, setActiveTab] = useState<OrderStatus>(readInitialTab);
   // Per-tab order cache: status -> Order[]
   const [ordersByStatus, setOrdersByStatus] = useState<Record<string, Order[]>>({
     pending: [], paid: [], packed: [], shipped: [], completed: []
@@ -40,59 +93,67 @@ export default function OrdersPage() {
     pending: 0, paid: 0, packed: 0, shipped: 0, completed: 0
   });
   const [loading, setLoading] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>({});
-  const [fetchedTabs, setFetchedTabs] = useState<Set<string>>(new Set());
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [packedPolls, setPackedPolls] = useState(0);
+  const [userProfile] = useState<Profile>(readStoredProfile);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const handleCheckoutSuccess = async (draft: Order) => {
+  const startDraftCheckout = async (draft: Order) => {
+    if (!cartSessionId) return alert("Sesi keranjang belum siap. Coba beberapa detik lagi.");
+    const snap = (window as WindowWithSnap).snap;
+    if (!snap) return alert("Midtrans Snap belum siap. Coba beberapa detik lagi.");
+
+    setCheckoutLoading(true);
     try {
-      const res = await fetch('/api/orders', {
+      const res = await fetch('/api/marketplace/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerEmail: userProfile.email || 'pelanggan@freshchain.id',
-          totalAmount: draft.totalAmount,
+          cartSessionId,
+          customerEmail: userProfile.email || DEFAULT_PROFILE.email,
           shippingAddress: draft.shippingAddress,
-          products: draft.products,
-          status: 'packed'
+          items: draft.products.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+          })),
         })
       });
       const json = await res.json();
-      if(json.success) {
-        clearCart();
-        setOrdersByStatus(prev => ({
-          ...prev,
-          packed: [json.data, ...(prev.packed || [])]
-        }));
-        setTabCounts(prev => ({ ...prev, packed: (prev.packed || 0) + 1 }));
-        setActiveTab('packed');
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Gagal membuat checkout");
       }
-    } catch(e) {
+
+      localStorage.setItem('freshchain_pending_checkout', JSON.stringify({
+        orderNumber: json.data.orderNumber,
+        cartSessionId,
+        shouldClearCart: true,
+      }));
+
+      snap.pay(json.data.token, {
+        onSuccess: function () {
+          clearCart();
+          window.location.href = '/marketplace/orders?tab=packed';
+        },
+        onPending: function () { window.location.href = '/payment/unfinish'; },
+        onError: function () { window.location.href = '/payment/error'; },
+        onClose: function () { alert('Anda menutup popup pembayaran'); }
+      });
+    } catch(e: unknown) {
+      alert(e instanceof Error ? e.message : "Gagal membuat transaksi");
       console.error(e);
+    } finally {
+      setCheckoutLoading(false);
     }
   };
-
-  // Load profile once
-  useEffect(() => {
-    const savedProfileStr = localStorage.getItem("freshchain_profile");
-    const profile = savedProfileStr ? JSON.parse(savedProfileStr) : {
-      name: "Ahmad Budi",
-      email: "pengguna@freshchain.id",
-      phone: "081234567890",
-      address: "Jl. Merdeka No. 123, Kecamatan Sukamaju, Kota Jakarta Selatan, 12345"
-    };
-    setUserProfile(profile);
-  }, []);
 
   // Fetch orders for active tab when profile is ready or tab changes
   useEffect(() => {
     if (!userProfile.email) return;
-    if (fetchedTabs.has(activeTab)) return; // already fetched, use cache
 
     const fetchTabOrders = async () => {
       setLoading(true);
       try {
-        // pending tab shows both "pending" (belum bayar) and "paid" (sudah bayar, belum dikemas)
+        // pending tab keeps legacy "paid" orders visible while new successful payments move to "packed".
         const statusParam = activeTab === 'pending' ? 'pending,paid' : activeTab;
         const res = await fetch(
           `/api/orders?email=${encodeURIComponent(userProfile.email)}&status=${statusParam}`
@@ -103,8 +164,19 @@ export default function OrdersPage() {
         if (json.success) {
           setOrdersByStatus(prev => ({ ...prev, [activeTab]: json.data }));
           setTabCounts(prev => ({ ...prev, [activeTab]: json.data.length }));
+          const pendingCheckout = localStorage.getItem('freshchain_pending_checkout');
+          if (activeTab === 'packed' && pendingCheckout) {
+            const pending = JSON.parse(pendingCheckout);
+            const foundPackedOrder = json.data.some((order: Order) => order.orderNumber === pending.orderNumber);
+
+            if (foundPackedOrder) {
+              localStorage.removeItem('freshchain_pending_checkout');
+              setPackedPolls(0);
+            } else if (packedPolls < 8) {
+              setTimeout(() => setPackedPolls((count) => count + 1), 2000);
+            }
+          }
         }
-        setFetchedTabs(prev => new Set(prev).add(activeTab));
       } catch (e) {
         console.error("Gagal mengambil pesanan:", e);
       } finally {
@@ -113,8 +185,7 @@ export default function OrdersPage() {
     };
 
     fetchTabOrders();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, userProfile.email]);
+  }, [activeTab, userProfile.email, packedPolls]);
 
 
   const tabs = [
@@ -130,7 +201,10 @@ export default function OrdersPage() {
      const draftOrder: Order = {
         _id: "draft-cart",
         orderNumber: "Draft Pesanan Belum Dibayar",
-        totalAmount: cartTotal,
+        subtotalAmount: cartTotal,
+        shippingFee: SHIPPING_FEE,
+        platformFee: 0,
+        totalAmount: cartTotal + SHIPPING_FEE,
         status: "pending",
         createdAt: new Date().toISOString(),
         shippingAddress: {
@@ -138,7 +212,7 @@ export default function OrdersPage() {
            phone: userProfile.phone || "081234567890",
            fullAddress: userProfile.address || "Jl. Merdeka No. 123"
         },
-        products: cartItems.map((item: any) => ({
+        products: cartItems.map((item) => ({
            productId: String(item.id),
            name: item.name,
            quantity: item.quantity,
@@ -163,6 +237,13 @@ export default function OrdersPage() {
       day: 'numeric'
     });
   };
+
+  const getSubtotal = (order: Order) => (
+    order.subtotalAmount ?? order.products.reduce((total, item) => total + item.price * item.quantity, 0)
+  );
+
+  const getShippingFee = (order: Order) => order.shippingFee ?? (order._id === 'draft-cart' ? SHIPPING_FEE : 0);
+  const getOrderTotal = (order: Order) => order.totalAmount ?? (getSubtotal(order) + getShippingFee(order));
 
   return (
     <div className="bg-frosted-white text-slate-gray font-inter min-h-screen relative overflow-x-hidden antialiased pb-24 lg:pb-0">
@@ -241,7 +322,7 @@ export default function OrdersPage() {
                 {tab.label}
                 <span className={`ml-1.5 inline-flex items-center justify-center text-[11px] font-bold px-2 py-0.5 rounded-full
                   ${activeTab === tab.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                  {tabCounts[tab.id] || 0}
+                  {(tabCounts[tab.id] || 0) + (tab.id === 'pending' && cartItems.length > 0 ? 1 : 0)}
                 </span>
               </button>
             ))}
@@ -350,7 +431,7 @@ export default function OrdersPage() {
                   <div className="flex items-center gap-4 w-full sm:w-auto">
                     <div className="bg-emerald-50/50 px-4 py-2 rounded-xl border border-emerald-100/50">
                       <p className="text-[11px] text-emerald-600 uppercase font-bold tracking-wider mb-0.5">Total Belanja</p>
-                      <p className="text-xl font-extrabold text-emerald-dark">{formatPrice(order.totalAmount)}</p>
+                      <p className="text-xl font-extrabold text-emerald-dark">{formatPrice(getOrderTotal(order))}</p>
                     </div>
                   </div>
 
@@ -359,34 +440,12 @@ export default function OrdersPage() {
                       <button 
                          onClick={async () => {
                            if (order._id === 'draft-cart') {
-                              try {
-                                const response = await fetch('/api/midtrans/transaction', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    amount: order.totalAmount + 15000, // + ongkir
-                                    firstName: order.shippingAddress.receiverName,
-                                    email: userProfile.email || 'pelanggan@freshchain.id'
-                                  })
-                                });
-                                const data = await response.json();
-                                if (data.token) {
-                                  (window as any).snap.pay(data.token, {
-                                    onSuccess: function () { 
-                                       handleCheckoutSuccess(order);
-                                    },
-                                    onPending: function () { window.location.href = '/payment/unfinish'; },
-                                    onError: function () { window.location.href = '/payment/error'; },
-                                    onClose: function () { alert('Anda menutup popup pembayaran'); }
-                                  });
-                                }
-                              } catch (e) {
-                                console.error(e);
-                              }
+                              startDraftCheckout(order);
                            }
                          }}
+                         disabled={checkoutLoading}
                          className="flex-1 sm:flex-none px-6 py-2.5 shadow-sm text-sm font-semibold rounded-xl text-white bg-emerald-main hover:bg-emerald-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all hover:-translate-y-0.5 hover:shadow-md">
-                        Checkout Sekarang
+                        {checkoutLoading ? 'Memproses...' : 'Checkout Sekarang'}
                       </button>
                     )}
                     {order.status === 'shipped' && (
@@ -489,15 +548,15 @@ export default function OrdersPage() {
                 <div className="bg-slate-50 p-5 rounded-xl space-y-3 text-sm">
                   <div className="flex justify-between text-slate-600">
                     <span>Subtotal Produk</span>
-                    <span className="font-medium text-slate-800">{formatPrice(selectedOrder.totalAmount)}</span>
+                    <span className="font-medium text-slate-800">{formatPrice(getSubtotal(selectedOrder))}</span>
                   </div>
                   <div className="flex justify-between text-slate-600">
                     <span>Ongkos Kirim</span>
-                    <span className="font-medium text-slate-800">{formatPrice(15000)}</span>
+                    <span className="font-medium text-slate-800">{formatPrice(getShippingFee(selectedOrder))}</span>
                   </div>
                   <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
                     <span className="font-bold text-slate-800">Total Pembayaran</span>
-                    <span className="text-lg font-extrabold text-emerald-main">{formatPrice(selectedOrder.totalAmount + 15000)}</span>
+                    <span className="text-lg font-extrabold text-emerald-main">{formatPrice(getOrderTotal(selectedOrder))}</span>
                   </div>
                 </div>
               </div>
