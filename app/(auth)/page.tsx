@@ -35,7 +35,6 @@ export default function RegisterPage() {
 
             let endpoint = "";
             if (selectedRole === "Petani") endpoint = "/api/auth/register/petani";
-            else if (selectedRole === "Investor") endpoint = "/api/auth/register/investor";
             else if (selectedRole === "Konsumen") endpoint = "/api/auth/register/konsumen";
             else throw new Error("Invalid role selected");
 
@@ -56,8 +55,6 @@ export default function RegisterPage() {
             const r = data.user?.role?.toLowerCase();
             if (r === "petani") {
                 window.location.href = "/petani/dashboard";
-            } else if (r === "investor") {
-                window.location.href = "/investor/dashboard";
             } else if (r === "konsumen") {
                 window.location.href = "/marketplace";
             } else {
@@ -93,20 +90,12 @@ export default function RegisterPage() {
                             <p>Daftarkan lahan & dapatkan pendanaan</p>
                         </div>
                         <div 
-                            className={`${styles.roleCard} ${selectedRole === 'Investor' ? styles.activeRole : ''}`}
-                            onClick={() => handleRoleSelect('Investor')}
-                        >
-                            <div className={styles.roleIcon}>📈</div>
-                            <h3>Investor</h3>
-                            <p>Danai proyek & pantau portofolio</p>
-                        </div>
-                        <div 
                             className={`${styles.roleCard} ${selectedRole === 'Konsumen' ? styles.activeRole : ''}`}
                             onClick={() => handleRoleSelect('Konsumen')}
                         >
-                            <div className={styles.roleIcon}>🛒</div>
-                            <h3>Konsumen</h3>
-                            <p>Beli produk dengan traceability</p>
+                            <div className={styles.roleIcon}>🛍️</div>
+                            <h3>Konsumen & Investor</h3>
+                            <p>Beli produk cerdas & danai proyek lokal</p>
                         </div>
                     </div>
                 </div>
@@ -212,54 +201,6 @@ export default function RegisterPage() {
                                 </>
                             )}
 
-                            {selectedRole === 'Investor' && (
-                                <>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className={styles.formGroup}>
-                                            <label htmlFor="nikPaspor">Nomor NIK / Paspor</label>
-                                            <input id="nikPaspor" name="nikPaspor" type="text" className={styles.input} placeholder="No. Identitas Resmi" required />
-                                        </div>
-                                        <div className={styles.formGroup}>
-                                            <label htmlFor="npwp">Nomor NPWP</label>
-                                            <input id="npwp" name="npwp" type="text" className={styles.input} placeholder="00.000.000.0-000.000" required />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className={styles.formGroup}>
-                                            <label htmlFor="income">Sumber Dana Investasi</label>
-                                            <select id="income" name="income" className={styles.input} required>
-                                                <option value="">Pilih Sumber Dana...</option>
-                                                <option value="Gaji">Gaji / Penghasilan Rutin</option>
-                                                <option value="Hasil Usaha">Keuntungan Hasil Usaha</option>
-                                                <option value="Tabungan">Tabungan / Deposito</option>
-                                                <option value="Lainnya">Lainnya</option>
-                                            </select>
-                                        </div>
-                                        <div className={styles.formGroup}>
-                                            <label htmlFor="risk">Profil Risiko Investasi</label>
-                                            <select id="risk" name="risk" className={styles.input} required>
-                                                <option value="">Pilih profil risiko...</option>
-                                                <option value="Konservatif">Konservatif (Cenderung Aman - Bunga Rendah)</option>
-                                                <option value="Moderat">Moderat (Risiko Menengah - Diversifikasi)</option>
-                                                <option value="Agresif">Agresif (Siap Kehilangan Sebagian Pokok)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                                        <div className={styles.formGroup}>
-                                            <label htmlFor="kycInvestorDoc">KTP / Paspor Resmi (Investor)</label>
-                                            <input id="kycInvestorDoc" name="kycInvestorDoc" type="file" className={styles.input} accept="image/jpeg,image/png,.pdf" required />
-                                        </div>
-                                        <div className={styles.formGroup}>
-                                            <label htmlFor="kycInvestorSelfie">Swafoto Liveness / Selfie dengan KTP</label>
-                                            <input id="kycInvestorSelfie" name="kycInvestorSelfie" type="file" className={styles.input} accept="image/jpeg,image/png" required />
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-
                             {selectedRole === 'Konsumen' && (
                                 <>
                                     <div className={styles.formGroup}>
@@ -282,8 +223,46 @@ export default function RegisterPage() {
                                         </div>
                                     </div>
 
+                                    <div className="mt-8 mb-4 border-t border-slate-200/50 pt-4">
+                                        <h3 className="font-bold text-slate-700 font-plus">Info Opsional: Buka Akses Investasi</h3>
+                                        <p className="text-xs text-slate-500 mb-4">Lengkapi data di bawah jika Anda juga berencana ingin mendanai proyek pertanian (Opsional untuk sekadar berbelanja).</p>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className={styles.formGroup}>
+                                                <label htmlFor="nikPaspor">Nomor NIK / Paspor</label>
+                                                <input id="nikPaspor" name="nikPaspor" type="text" className={styles.input} placeholder="No. Identitas Resmi" />
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label htmlFor="npwp">Nomor NPWP</label>
+                                                <input id="npwp" name="npwp" type="text" className={styles.input} placeholder="00.000.000.0-000.000" />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className={styles.formGroup}>
+                                                <label htmlFor="income">Sumber Dana Investasi</label>
+                                                <select id="income" name="income" className={styles.input}>
+                                                    <option value="">Pilih Sumber Dana...</option>
+                                                    <option value="Gaji">Gaji / Penghasilan Rutin</option>
+                                                    <option value="Hasil Usaha">Keuntungan Hasil Usaha</option>
+                                                    <option value="Tabungan">Tabungan / Deposito</option>
+                                                    <option value="Lainnya">Lainnya</option>
+                                                </select>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label htmlFor="risk">Profil Risiko Investasi</label>
+                                                <select id="risk" name="risk" className={styles.input}>
+                                                    <option value="">Pilih profil risiko...</option>
+                                                    <option value="Konservatif">Konservatif (Cenderung Aman - Bunga Rendah)</option>
+                                                    <option value="Moderat">Moderat (Risiko Menengah - Diversifikasi)</option>
+                                                    <option value="Agresif">Agresif (Siap Kehilangan Sebagian Pokok)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div className={`${styles.formGroup} mt-6`}>
-                                        <label htmlFor="kyc">Upload Dokumen KYC (KTP)</label>
+                                        <label htmlFor="kyc">Upload Dokumen KYC (KTP/Paspor)</label>
                                         <input id="kyc" name="kyc" type="file" className={styles.input} accept="image/*,.pdf" required />
                                     </div>
                                 </>

@@ -114,6 +114,12 @@ export default function CrowdfundingPage() {
               <span className="material-symbols-outlined">notifications</span>
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border border-white" />
             </button>
+
+            <Link href="/investor/dashboard" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-main bg-emerald-50 border border-emerald-100 px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-colors shadow-sm">
+                <span className="material-symbols-outlined text-[18px]">show_chart</span>
+                Kelola Investasi
+            </Link>
+
             <button className="hidden sm:flex items-center gap-2 bg-emerald-main text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-main/20 hover:opacity-90 active:scale-95 transition-all text-sm">
               <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
               <span>Saldo</span>

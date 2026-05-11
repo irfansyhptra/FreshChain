@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "@/styles/globals.css";
+import { CartProvider } from "@/components/CartContext";
 
 export const metadata: Metadata = {
   title: "FreshChain | Registration & KYC",
@@ -19,7 +20,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body className="bg-living-canvas">
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
         {/* Midtrans Snap Sandbox Script */}
         <Script
           src="https://app.sandbox.midtrans.com/snap/snap.js"

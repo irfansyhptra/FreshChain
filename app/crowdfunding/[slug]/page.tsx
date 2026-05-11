@@ -36,12 +36,23 @@ export default function CampaignDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"overview" | "rab" | "simulation">("overview");
+  const [investmentAmount, setInvestmentAmount] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     fetch(`/api/crowdfunding/${id}`)
       .then(r => r.json())
-      .then(j => { if (j.success) setCampaign(j.data); else setError(j.message); })
+      .then(j => { 
+        if (j.success) {
+            setCampaign(j.data); 
+            if (j.data.investmentTerms?.minInvestment) {
+                setInvestmentAmount(j.data.investmentTerms.minInvestment);
+            }
+        } else {
+            setError(j.message); 
+        }
+      })
       .catch(() => setError("Gagal memuat data"))
       .finally(() => setLoading(false));
   }, [id]);
@@ -376,9 +387,62 @@ export default function CampaignDetailPage() {
                 ))}
               </div>
             )}
-            <button className="w-full bg-gradient-to-r from-emerald-main to-[#10B981] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-100 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">trending_up</span>
-              Investasi Sekarang
+
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-slate-500 mb-1">Nominal Investasi</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Rp</span>
+                <input 
+                  type="number" 
+                  value={investmentAmount}
+                  onChange={(e) => setInvestmentAmount(Number(e.target.value))}
+                  min={campaign.investmentTerms?.minInvestment || 10000}
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-xl py-3 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-emerald-main/20 focus:border-emerald-main transition-all"
+                />
+              </div>
+              {campaign.investmentTerms?.minInvestment && investmentAmount < campaign.investmentTerms.minInvestment && (
+                <p className="text-[10px] text-red-500 mt-1">*Minimal investasi Rp {fmt(campaign.investmentTerms.minInvestment)}</p>
+              )}
+            </div>
+
+            <button 
+              onClick={async () => {
+                if (investmentAmount < (campaign.investmentTerms?.minInvestment || 10000)) return;
+                setIsProcessing(true);
+                try {
+                  const response = await fetch('/api/midtrans/transaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      amount: investmentAmount,
+                      firstName: 'Investor',
+                      email: 'investor@freshchain.id'
+                    })
+                  });
+                  const data = await response.json();
+                  if(data.token) {
+                    (window as any).snap.pay(data.token, {
+                      onSuccess: function (result: any) { window.location.href = '/payment/finish'; },
+                      onPending: function (result: any) { window.location.href = '/payment/unfinish'; },
+                      onError: function (result: any) { window.location.href = '/payment/error'; },
+                      onClose: function () { alert('Anda menutup popup sebelum menyelesaikan investasi'); }
+                    });
+                  }
+                } catch(e) {
+                  alert('Gagal memproses investasi');
+                } finally {
+                  setIsProcessing(false);
+                }
+              }}
+              disabled={isProcessing || (campaign.investmentTerms?.minInvestment ? investmentAmount < campaign.investmentTerms.minInvestment : false)}
+              className="w-full bg-gradient-to-r from-emerald-main to-[#10B981] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            >
+              {isProcessing ? 'Memproses...' : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]">trending_up</span>
+                  Investasi Sekarang
+                </>
+              )}
             </button>
             <p className="text-[10px] text-slate-400 text-center mt-2">Dana aman — 100% refund jika gagal target</p>
           </div>

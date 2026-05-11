@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useCart } from "@/components/CartContext";
 
 type Product = {
   _id: string;
@@ -23,6 +24,7 @@ const CATEGORIES = ["Semua Produk", "Sayur Organik", "Buah Tropis", "Gandum & Bi
 const fmt = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 
 export default function MarketplacePage() {
+  const { addToCart, cartItems, cartTotal, removeFromCart } = useCart();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -89,6 +91,11 @@ export default function MarketplacePage() {
               <span className="material-symbols-outlined">notifications</span>
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
             </button>
+
+            <Link href="/investor/dashboard" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-main bg-emerald-50 border border-emerald-100 px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-colors shadow-sm">
+                <span className="material-symbols-outlined text-[18px]">show_chart</span>
+                Kelola Investasi
+            </Link>
 
             <button className="hidden sm:flex items-center gap-2 bg-emerald-main text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-main/20 hover:opacity-90 active:scale-95 transition-all text-sm">
               <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
@@ -201,7 +208,19 @@ export default function MarketplacePage() {
                         <p className="text-[10px] text-slate-400">{p.category}</p>
                       </div>
                     </div>
-                    <button onClick={(e) => { e.preventDefault(); }} className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors" disabled={p.stock === 0}>
+                    <button 
+                      onClick={(e) => { 
+                        e.preventDefault(); 
+                        addToCart({
+                          id: p._id,
+                          name: p.name,
+                          price: p.price,
+                          imageUrl: p.imageUrl
+                        } as any);
+                      }} 
+                      className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors" 
+                      disabled={p.stock === 0}
+                    >
                       <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
                     </button>
                   </div>
@@ -222,102 +241,86 @@ export default function MarketplacePage() {
               Ringkasan Keranjang
             </h2>
 
-            {/* Cart Items */}
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <img 
-                    src="/buahCabai.jpeg" 
-                    alt="Cabai thumb" 
-                    className="w-12 h-12 rounded-xl object-cover border border-slate-100"
-                  />
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">Cabai Merah Segar</p>
-                    <p className="text-xs text-emerald-main font-semibold">2 kg</p>
-                  </div>
+            {cartItems.length === 0 ? (
+              <div className="text-center py-10">
+                <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">shopping_bag</span>
+                <p className="text-sm text-slate-500">Keranjang masih kosong</p>
+              </div>
+            ) : (
+              <>
+                {/* Cart Items */}
+                <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-100 overflow-hidden relative">
+                           {/* Using any for index signature since CartItem lacks imageUrl natively without extension */}
+                          {(item as any).imageUrl ? (
+                            <Image src={(item as any).imageUrl} alt={item.name} fill className="object-cover" />
+                          ) : (
+                            <span className="material-symbols-outlined text-slate-400">image</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800 line-clamp-1">{item.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <button onClick={() => removeFromCart(item.id)} className="text-xs text-rose-500 hover:text-rose-600">Hapus</button>
+                            <span className="text-xs text-emerald-main font-semibold">{item.quantity}x</span>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold text-slate-700">Rp {fmt(item.price * item.quantity)}</span>
+                    </div>
+                  ))}
                 </div>
-                <span className="text-sm font-bold text-slate-700">Rp 90.000</span>
-              </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <img 
-                    src="/buahTomat.jpg" 
-                    alt="Tomat thumb" 
-                    className="w-12 h-12 rounded-xl object-cover border border-slate-100"
-                  />
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">Tomat Segar Pilihan</p>
-                    <p className="text-xs text-emerald-main font-semibold">1 kg</p>
+                <div className="pt-4 border-t border-slate-100 space-y-2 mb-6">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Subtotal Produk</span>
+                    <span className="font-semibold text-slate-700">Rp {fmt(cartTotal)}</span>
                   </div>
-                </div>
-                <span className="text-sm font-bold text-slate-700">Rp 20.000</span>
-              </div>
-            </div>
-
-            {/* Shipping Detail */}
-            <div className="mb-6 pt-4 border-t border-slate-100">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Opsi Pengiriman</h3>
-              
-              <div className="space-y-2 flex flex-col gap-2">
-                <label className="flex items-center justify-between p-3 rounded-xl border-2 border-emerald-main bg-emerald-50/50 cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <input type="radio" name="ship" defaultChecked className="accent-emerald-main w-4 h-4" />
-                    <span className="text-sm font-semibold text-emerald-dark">SiCepat Regular</span>
-                  </div>
-                  <span className="text-sm font-bold text-emerald-main">Rp 12k</span>
-                </label>
-                <label className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white/50 cursor-pointer hover:border-emerald-main/50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <input type="radio" name="ship" className="accent-emerald-main w-4 h-4" />
-                    <span className="text-sm font-medium text-slate-600">Grab Instant</span>
-                  </div>
-                  <span className="text-sm font-bold text-slate-600">Rp 35k</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="mb-6 pt-4 border-t border-slate-100">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Metode Pembayaran</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                <button className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border border-slate-200 bg-white hover:border-emerald-main/50 transition-colors">
-                  <span className="material-symbols-outlined text-slate-500 text-[18px]">qr_code_2</span>
-                  <span className="text-[10px] font-bold text-slate-600">QRIS</span>
-                </button>
-                <button className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border-2 border-emerald-main bg-emerald-50 text-emerald-main">
-                  <span className="material-symbols-outlined text-emerald-main text-[18px]" style={{fontVariationSettings: "'FILL' 1"}}>account_balance_wallet</span>
-                  <span className="text-[10px] font-bold">Dompet</span>
-                </button>
-                <button className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border border-slate-200 bg-white hover:border-emerald-main/50 transition-colors">
-                  <span className="material-symbols-outlined text-slate-500 text-[18px]">account_balance</span>
-                  <span className="text-[10px] font-bold text-slate-600">Bank</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 space-y-2 mb-6">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Subtotal Produk</span>
-                <span className="font-semibold text-slate-700">Rp 152.000</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Biaya Pengiriman</span>
-                <span className="font-semibold text-slate-700">Rp 12.000</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Biaya Platform</span>
+                    <span className="font-semibold text-slate-700">Rp 1.000</span>
               </div>
               <div className="flex justify-between text-lg mt-2 pt-2 border-t border-slate-100">
                 <span className="font-bold text-emerald-dark">Total</span>
-                <span className="font-extrabold text-emerald-main">Rp 164.000</span>
+                <span className="font-extrabold text-emerald-main">Rp {fmt(cartTotal + 1000)}</span>
               </div>
             </div>
 
             <button 
-              onClick={() => setIsModalOpen(true)}
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/midtrans/transaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      amount: cartTotal + 1000,
+                      firstName: 'Pelanggan',
+                      email: 'pelanggan@freshchain.id'
+                    })
+                  });
+                  const data = await response.json();
+                  if(data.token) {
+                    (window as any).snap.pay(data.token, {
+                      onSuccess: function (result: any) { window.location.href = '/payment/finish'; },
+                      onPending: function (result: any) { window.location.href = '/payment/unfinish'; },
+                      onError: function (result: any) { window.location.href = '/payment/error'; },
+                      onClose: function () { alert('Anda menutup popup sebelum menyelesaikan pembayaran'); }
+                    });
+                  }
+                } catch(e) {
+                  alert('Gagal membuat transaksi');
+                }
+              }}
               className="w-full bg-gradient-to-r from-emerald-main to-[#10B981] text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-main/20 hover:opacity-90 active:scale-95 transition-all text-sm flex justify-center items-center gap-2"
             >
               Bayar Sekarang
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </button>
+            </>
+            )}
 
             <div className="mt-6 flex items-start gap-3 bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
               <span className="material-symbols-outlined text-emerald-main text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>verified_user</span>

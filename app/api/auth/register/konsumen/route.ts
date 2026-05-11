@@ -44,6 +44,11 @@ export async function POST(request: Request) {
                 kota: formData.get("kota") as string,
                 kodepos: formData.get("kodepos") as string,
                 kycUrl: await saveFileCloudinary(formData.get("kyc") as File, "konsumen_kyc"),
+                
+                nikPaspor: formData.get("nikPaspor") as string || undefined,
+                npwp: formData.get("npwp") as string || undefined,
+                incomeSource: formData.get("income") as string || undefined,
+                riskProfile: formData.get("risk") as string || undefined,
             }
         };
 

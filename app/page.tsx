@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Role = 'petani' | 'investor' | 'konsumen';
+type Role = 'petani' | 'konsumen';
 type KycStep = 'doc1' | 'doc2' | null;
 type StepStatus = 'upcoming' | 'active' | 'done';
 
@@ -47,27 +47,9 @@ const ROLES: Record<Role, RoleConfig> = {
       formType: 'camera',
     },
   },
-  investor: {
-    href: '/investor/dashboard',
-    roleName: 'Investor',
-    accentColor: 'violet',
-    doc1: {
-      icon: 'credit_card',
-      title: 'KTP / Paspor Resmi',
-      desc: 'Unggah foto dokumen identitas resmi. Maks 10MB (JPG, PNG, PDF).',
-      formType: 'upload',
-      acceptTypes: 'image/*,.pdf',
-    },
-    doc2: {
-      icon: 'face_retouching_natural',
-      title: 'Swafoto Liveness',
-      desc: 'Ambil foto wajah langsung untuk verifikasi biometrik real-time.',
-      formType: 'camera',
-    },
-  },
   konsumen: {
     href: '/marketplace',
-    roleName: 'Konsumen',
+    roleName: 'Konsumen & Investor',
     accentColor: 'sky',
     doc1: {
       icon: 'contact_mail',
@@ -137,16 +119,14 @@ function RoleConfirmDialog({
 }: { role: Role; onConfirm: () => void; onCancel: () => void }) {
   const rc = ROLES[role];
   const c = COLOR[rc.accentColor];
-  const roleIcons: Record<Role, string> = { petani: 'agriculture', investor: 'account_balance', konsumen: 'shopping_basket' };
+  const roleIcons: Record<Role, string> = { petani: 'agriculture', konsumen: 'shopping_basket' };
   const roleGrads: Record<Role, string> = {
     petani: 'from-emerald-400 via-green-500 to-teal-600',
-    investor: 'from-violet-400 via-purple-500 to-indigo-600',
     konsumen: 'from-sky-400 via-blue-500 to-cyan-600',
   };
   const roleDescs: Record<Role, string> = {
     petani: 'Anda akan mendaftarkan diri sebagai Petani & Produsen. Anda memerlukan dokumen KTP, sertifikat lahan, dan verifikasi wajah.',
-    investor: 'Anda akan mendaftarkan diri sebagai Investor. Anda memerlukan dokumen KTP/Paspor resmi dan verifikasi wajah.',
-    konsumen: 'Anda akan mendaftarkan diri sebagai Konsumen. Anda memerlukan nomor HP aktif dan alamat pengiriman.',
+    konsumen: 'Anda akan mendaftarkan diri sebagai Konsumen & Investor. Anda memerlukan nomor HP aktif dan alamat pengiriman.',
   };
 
   return (
@@ -556,22 +536,19 @@ export default function AppHome() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const roleIcons: Record<Role, string> = { petani: 'agriculture', investor: 'account_balance', konsumen: 'shopping_basket' };
-  const roleBadges: Record<Role, string> = { petani: 'AGRI', investor: 'ROI', konsumen: 'BELI' };
+  const roleIcons: Record<Role, string> = { petani: 'agriculture', konsumen: 'shopping_basket' };
+  const roleBadges: Record<Role, string> = { petani: 'AGRI', konsumen: 'BELI' };
   const roleTags: Record<Role, string[]> = {
     petani: ['Pendanaan', 'Traceability', 'Dashboard'],
-    investor: ['Portofolio', 'ROI', 'Aset Hijau'],
     konsumen: ['Organik', 'Tertelusur', 'Langsung'],
   };
   const roleGrads: Record<Role, string> = {
     petani: 'from-emerald-400 via-green-500 to-teal-600',
-    investor: 'from-violet-400 via-purple-500 to-indigo-600',
     konsumen: 'from-sky-400 via-blue-500 to-cyan-600',
   };
   const roleDescs: Record<Role, string> = {
     petani: 'Daftarkan lahan, terima pendanaan, dan jual hasil panen langsung ke pasar.',
-    investor: 'Investasikan modal ke komoditas pertanian terverifikasi dengan ROI transparan.',
-    konsumen: 'Beli produk segar langsung dari petani, bebas perantara.',
+    konsumen: 'Beli produk segar dari petani dan danai proyek.',
   };
 
   return (
@@ -874,8 +851,8 @@ export default function AppHome() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {(['petani', 'investor', 'konsumen'] as Role[]).map((r) => {
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {(['petani', 'konsumen'] as Role[]).map((r) => {
                     const rc = ROLES[r];
                     const cc = COLOR[rc.accentColor];
                     const isSelected = selectedRole === r;
@@ -915,13 +892,6 @@ export default function AppHome() {
                           {isLocked && (
                             <div className="absolute inset-0 flex items-center justify-center bg-white/40">
                               <span className="material-symbols-outlined text-slate-400 text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>lock</span>
-                            </div>
-                          )}
-                          {r === 'investor' && !isLocked && (
-                            <div className="absolute top-2 left-2">
-                              <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${isSelected ? 'bg-white/90 text-violet-700' : 'bg-white text-violet-600'}`}>
-                                Populer
-                              </span>
                             </div>
                           )}
                         </div>
@@ -1219,9 +1189,6 @@ export default function AppHome() {
                       if (selectedRole === 'petani') {
                          formData.append("kycKTP", kycFiles['doc1'] || '');
                          formData.append("kycLand", kycFiles['doc2'] || ''); 
-                      } else if (selectedRole === 'investor') {
-                         formData.append("kycInvestorDoc", kycFiles['doc1'] || '');
-                         formData.append("kycInvestorSelfie", kycFiles['doc2'] || '');
                       } else if (selectedRole === 'konsumen') {
                          formData.append("kyc", kycFiles['doc1'] || '');
                          // For konsumen, use physical text references mapped nicely

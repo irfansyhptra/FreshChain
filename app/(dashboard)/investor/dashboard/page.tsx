@@ -1,11 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function InvestorDashboardPage() {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/investor/dashboard");
+        const json = await res.json();
+        if (json.success) {
+          setData(json.data);
+        }
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const stats = data?.stats || {
+    portfolioValueLabel: "Rp 0",
+    roiReceivedLabel: "Rp 0",
+    activeAssets: 0,
+    averageAnnualYield: 0
+  };
+
+  const investments = data?.investments || [];
 
   return (
     <div className="bg-frosted-white text-slate-gray font-inter min-h-screen relative overflow-x-hidden antialiased">
@@ -74,14 +99,16 @@ export default function InvestorDashboardPage() {
             </div>
             
             <div className="hidden lg:block">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">September 24, 2024</p>
-              <h2 className="text-2xl font-extrabold text-slate-800 font-plus">Selamat Datang, Budi!</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+                {new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+              <h2 className="text-2xl font-extrabold text-slate-800 font-plus">Selamat Datang, {data?.name || "Memuat..."}!</h2>
             </div>
             
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 bg-white/80 border border-slate-200/60 rounded-full px-4 py-2 shadow-sm text-sm font-bold text-emerald-dark">
                 <span className="material-symbols-outlined text-emerald-main text-[18px]" style={{fontVariationSettings: "'FILL' 1"}}>account_balance_wallet</span>
-                <span>Rp 42.500.000</span>
+                <span>Rp {data ? Number(data.walletBalance).toLocaleString('id-ID') : "0"}</span>
               </div>
               <button className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500 hover:text-blockchain-blue transition-colors relative">
                 <span className="material-symbols-outlined text-[20px]">notifications</span>
@@ -108,11 +135,11 @@ export default function InvestorDashboardPage() {
                        <p className="text-sm font-semibold text-blue-100">Nilai Portofolio</p>
                        <span className="material-symbols-outlined text-white/50 text-[28px]">trending_up</span>
                     </div>
-                    <h3 className="text-2xl md:text-2xl md:text-3xl sm:text-2xl sm:text-2xl md:text-3xl md:text-2xl sm:text-3xl md:text-4xl font-extrabold font-plus tracking-tight">Rp 842.12M</h3>
+                    <h3 className="text-2xl md:text-2xl md:text-3xl sm:text-2xl sm:text-2xl md:text-3xl md:text-2xl sm:text-3xl md:text-4xl font-extrabold font-plus tracking-tight">{stats.portfolioValueLabel}</h3>
                   </div>
                   <div className="mt-8 flex items-center gap-2 bg-white/20 backdrop-blur-sm w-fit px-3 py-1.5 rounded-lg border border-white/10">
                     <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
-                    <span className="text-xs font-bold">+12.4%</span>
+                    <span className="text-xs font-bold">+{stats.averageAnnualYield}%</span>
                     <span className="text-[10px] text-blue-100 ml-1">Tahun Ini</span>
                   </div>
                 </div>
@@ -126,7 +153,7 @@ export default function InvestorDashboardPage() {
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-sm font-semibold text-slate-500 mb-1">Total ROI Diterima</p>
-                        <h3 className="text-2xl font-extrabold text-emerald-main font-plus tracking-tight">Rp 104.5M</h3>
+                        <h3 className="text-2xl font-extrabold text-emerald-main font-plus tracking-tight">{stats.roiReceivedLabel}</h3>
                       </div>
                       <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-main flex items-center justify-center border border-emerald-100">
                         <span className="material-symbols-outlined text-[24px]">payments</span>
@@ -150,7 +177,7 @@ export default function InvestorDashboardPage() {
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-sm font-semibold text-slate-500 mb-1">Aset Aktif</p>
-                        <h3 className="text-2xl font-extrabold text-slate-800 font-plus tracking-tight">12 Kluster</h3>
+                        <h3 className="text-2xl font-extrabold text-slate-800 font-plus tracking-tight">{stats.activeAssets} Proyek</h3>
                       </div>
                       <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
                         <span className="material-symbols-outlined text-[24px]">eco</span>
@@ -161,9 +188,11 @@ export default function InvestorDashboardPage() {
                         <div className="w-8 h-8 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700 z-30">P</div>
                         <div className="w-8 h-8 rounded-full border-2 border-white bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 z-20">J</div>
                         <div className="w-8 h-8 rounded-full border-2 border-white bg-rose-100 flex items-center justify-center text-xs font-bold text-rose-700 z-10">T</div>
-                        <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 z-0">+9</div>
+                        {(stats.activeAssets > 3) && (
+                          <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 z-0">+{stats.activeAssets - 3}</div>
+                        )}
                       </div>
-                      <span className="ml-4 text-xs font-semibold text-slate-400">Tersebar di 4 Provinsi</span>
+                      <span className="ml-4 text-xs font-semibold text-slate-400">Pembaruan Terbaru</span>
                     </div>
                  </div>
 
@@ -246,8 +275,31 @@ export default function InvestorDashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="text-sm">
-                      <tr className="border-b border-slate-100 last:border-0 hover:bg-white/50 transition-colors group">
-                        <td className="py-4 pl-2 font-bold text-slate-700">Kluster Bioflok A21</td>
+                      {investments.length > 0 ? (
+                        investments.map((inv: any) => (
+                          <tr key={inv.id} className="border-b border-slate-100 last:border-0 hover:bg-white/50 transition-colors group">
+                            <td className="py-4 pl-2 font-bold text-slate-700">{inv.campaign?.title || "Proyek Tidak Diketahui"}</td>
+                            <td className="py-4 text-slate-600">{new Date(inv.investedAt).toLocaleDateString('id-ID')}</td>
+                            <td className="py-4 font-extrabold text-slate-800">{inv.amountLabel}</td>
+                            <td className="py-4 text-right pr-2">
+                              <span className={`inline-flex px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                                inv.status === 'Active' ? 'bg-amber-50 text-amber-600' :
+                                inv.status === 'ProfitPaid' ? 'bg-emerald-50 text-emerald-600' :
+                                'bg-slate-100 text-slate-500'
+                              }`}>
+                                {inv.status === 'Active' ? 'Berjalan' : inv.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-slate-500 text-sm">
+                            Belum ada riwayat investasi.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
                         <td className="py-4 text-slate-500 font-medium">24 Okt 2024</td>
                         <td className="py-4 font-extrabold text-emerald-main">+4.250.000</td>
                         <td className="py-4 text-right pr-2">

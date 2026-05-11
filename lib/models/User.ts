@@ -10,15 +10,6 @@ export interface IPetaniProfile {
     kycLandUrl?: string;
 }
 
-export interface IInvestorProfile {
-    nikPaspor: string;
-    npwp: string;
-    incomeSource: string;
-    riskProfile: string;
-    kycDocUrl?: string;
-    kycSelfieUrl?: string;
-}
-
 export interface IKonsumenProfile {
     phone: string;
     address: string;
@@ -26,20 +17,27 @@ export interface IKonsumenProfile {
     kota: string;
     kodepos: string;
     kycUrl?: string;
+    
+    // Investasi fields
+    nikPaspor?: string;
+    npwp?: string;
+    incomeSource?: string;
+    riskProfile?: string;
+    kycDocUrl?: string;
+    kycSelfieUrl?: string;
 }
 
 export interface IUser extends Document {
     name: string;
     email: string;
     password?: string;
-    role: "Petani" | "Investor" | "Konsumen" | "Admin";
+    role: "Petani" | "Konsumen" | "Admin";
     dob?: Date;
     phone?: string;
     address?: string;
-    kycStatus: "Pending" | "Verified" | "Rejected";
+    kycStatus: "Pending" | "Verified" | "Rejected" | "Unverified";
     
     petaniProfile?: IPetaniProfile;
-    investorProfile?: IInvestorProfile;
     konsumenProfile?: IKonsumenProfile;
     
     createdAt: Date;
@@ -53,15 +51,15 @@ const UserSchema: Schema = new Schema({
     role: {
         type: String,
         required: true,
-        enum: ["Petani", "Investor", "Konsumen", "Admin"]
+        enum: ["Petani", "Konsumen", "Admin"]
     },
     dob: { type: Date },
     phone: { type: String },
     address: { type: String },
     kycStatus: {
         type: String,
-        default: "Pending",
-        enum: ["Pending", "Verified", "Rejected"]
+        default: "Unverified",
+        enum: ["Unverified", "Pending", "Verified", "Rejected"]
     },
     
     petaniProfile: {
@@ -74,15 +72,6 @@ const UserSchema: Schema = new Schema({
         kycLandUrl: String,
     },
     
-    investorProfile: {
-        nikPaspor: String,
-        npwp: String,
-        incomeSource: String,
-        riskProfile: String,
-        kycDocUrl: String,
-        kycSelfieUrl: String,
-    },
-    
     konsumenProfile: {
         phone: String,
         address: String,
@@ -90,6 +79,13 @@ const UserSchema: Schema = new Schema({
         kota: String,
         kodepos: String,
         kycUrl: String,
+        
+        nikPaspor: String,
+        npwp: String,
+        incomeSource: String,
+        riskProfile: String,
+        kycDocUrl: String,
+        kycSelfieUrl: String,
     },
     
     createdAt: { type: Date, default: Date.now },
