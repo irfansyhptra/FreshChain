@@ -196,6 +196,7 @@ export async function createMarketplaceCheckout(input: MarketplaceCheckoutInput)
         // Also create a Transaction record for tracking
         await TransactionService.createTransaction({
             guestEmail: email,
+            transactionNumber: orderNumber,
             products: orderProducts.map((item) => ({
                 productId: item.productId.toString(),
                 name: item.name,
@@ -302,7 +303,7 @@ export async function applyMarketplacePaymentNotification(notification: Midtrans
 
     if (success) {
         if (order.paymentStatus !== "paid" || order.status !== "packed") {
-            order.status = "packed";
+            order.status = "paid";
             order.paymentStatus = "paid";
             order.paymentType = notification.payment_type;
             order.midtransTransactionId = notification.transaction_id;

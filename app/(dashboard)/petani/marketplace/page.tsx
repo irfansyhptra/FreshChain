@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 type ProductStatus = "Aktif" | "Habis" | "Ditarik";
 type ProductCategory = "Sayur Organik" | "Buah Tropis" | "Gandum & Biji" | "Rempah & Bumbu" | "Lainnya";
@@ -157,13 +158,22 @@ export default function PetaniMarketplacePage() {
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">Kelola dan upload hasil panen ke marketplace FreshChain</p>
         </div>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 bg-gradient-to-r from-emerald-main to-[#10B981] text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:shadow-lg active:scale-95 transition-all text-sm"
-        >
-          <span className="material-symbols-outlined text-[18px]">add_circle</span>
-          Upload Produk
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/petani/marketplace/orders"
+            className="flex items-center gap-2 bg-white/80 border border-white/60 text-emerald-dark px-5 py-2.5 rounded-xl font-bold shadow-sm hover:shadow-md active:scale-95 transition-all text-sm"
+          >
+            <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+            Pesanan Diterima
+          </Link>
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-main to-[#10B981] text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:shadow-lg active:scale-95 transition-all text-sm"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            Upload Produk
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

@@ -3,10 +3,12 @@ import dbConnect from "@/lib/mongodb/client";
 import { Transaction, ITransaction } from "@/lib/models/Transaction";
 import { User } from "@/lib/models/User";
 import { Order } from "@/lib/models/Order";
+import { Product } from "@/lib/models/Product";
 
 type CreateTransactionInput = {
     userId?: string;
     guestEmail?: string;
+    transactionNumber?: string;
     products: Array<{
         productId: string;
         name: string;
@@ -34,11 +36,13 @@ export class TransactionService {
     static async createTransaction(input: CreateTransactionInput): Promise<ITransaction> {
         await dbConnect();
 
-        const transactionNumber = `TXN-${Date.now()}-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`;
+        const generatedTransactionNumber = `TXN-${Date.now()}-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`;
+        const transactionNumber = String(input.transactionNumber || input.paymentReference || generatedTransactionNumber).trim();
+        const guestEmail = input.guestEmail ? input.guestEmail.trim().toLowerCase() : undefined;
 
         const transactionData = {
             userId: input.userId ? new mongoose.Types.ObjectId(input.userId) : undefined,
-            guestEmail: input.guestEmail,
+            guestEmail,
             transactionNumber,
             products: input.products.map((item) => ({
                 productId: new mongoose.Types.ObjectId(item.productId),
@@ -57,7 +61,7 @@ export class TransactionService {
             paymentStatus: "pending" as const,
             stockReserved: true,
             cartSessionId: input.cartSessionId,
-            paymentReference: input.paymentReference,
+            paymentReference: input.paymentReference || transactionNumber,
         };
 
         const transaction = await Transaction.create(transactionData);
@@ -72,6 +76,32 @@ export class TransactionService {
         }
 
         return transaction;
+    }
+
+    /**
+     * Get all transactions that contain products belonging to a farmer
+     */
+    static async getFarmerTransactions(
+        farmerId: string,
+        statusFilter?: string | string[]
+    ): Promise<ITransaction[]> {
+        await dbConnect();
+
+        const productIds = await Product.find({ farmerId: new mongoose.Types.ObjectId(farmerId) }).distinct("_id");
+        if (!productIds.length) return [];
+
+        const query: Record<string, unknown> = {
+            "products.productId": { $in: productIds },
+        };
+
+        if (statusFilter) {
+            const statuses = Array.isArray(statusFilter)
+                ? statusFilter
+                : statusFilter.split(",").map((s) => s.trim());
+            query.status = statuses.length === 1 ? statuses[0] : { $in: statuses };
+        }
+
+        return Transaction.find(query).sort({ createdAt: -1 });
     }
 
     /**
@@ -138,7 +168,7 @@ export class TransactionService {
         };
 
         if (paymentStatus === "paid") {
-            updateData.status = "packed"; // Move directly to packed after payment
+            updateData.status = "paid";
             updateData.paidAt = new Date();
         } else if (["failed", "cancelled", "expired"].includes(paymentStatus)) {
             updateData.status = "cancelled";
@@ -190,6 +220,51 @@ export class TransactionService {
                 await transaction.save();
             }
         }
+
+        return transaction;
+    }
+
+    /**
+     * Advance an entire transaction for farmer fulfillment.
+     * This updates all product statuses in the transaction and mirrors the change to Order.
+     */
+    static async advanceTransactionStatus(
+        transactionNumber: string,
+        status: "packed" | "shipped"
+    ): Promise<ITransaction | null> {
+        await dbConnect();
+
+        const now = new Date();
+        const transaction = await Transaction.findOne({ transactionNumber });
+        if (!transaction) return null;
+
+        transaction.products = transaction.products.map((item) => ({
+            ...item,
+            status,
+        }));
+        transaction.status = status;
+        if (status === "packed" && transaction.paymentStatus !== "paid") {
+            transaction.paymentStatus = "paid";
+        }
+        if (status === "packed") {
+            transaction.paidAt = transaction.paidAt || now;
+        }
+        if (status === "shipped") {
+            transaction.shippedAt = now;
+        }
+
+        await transaction.save();
+
+        await Order.findOneAndUpdate(
+            { orderNumber: transactionNumber },
+            {
+                $set: {
+                    status,
+                    ...(status === "shipped" ? { shippedAt: now } : {}),
+                },
+            },
+            { new: true }
+        );
 
         return transaction;
     }

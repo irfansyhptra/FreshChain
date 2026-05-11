@@ -132,7 +132,7 @@ export default function OrdersPage() {
       snap.pay(json.data.token, {
         onSuccess: function () {
           clearCart();
-          window.location.href = '/marketplace/orders?tab=packed';
+          window.location.href = '/marketplace/orders?tab=pending';
         },
         onPending: function () { window.location.href = '/payment/unfinish'; },
         onError: function () { window.location.href = '/payment/error'; },
