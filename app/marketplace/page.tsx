@@ -30,6 +30,22 @@ export default function MarketplacePage() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [activeCategory, setActiveCategory] = useState("Semua Produk");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [orderQuantity, setOrderQuantity] = useState(1);
+  const [shippingAddress, setShippingAddress] = useState("");
+
+  useEffect(() => {
+    // Load default address from profile on mount
+    const savedProfile = localStorage.getItem("freshchain_profile");
+    if (savedProfile) {
+      const parsed = JSON.parse(savedProfile);
+      if (parsed.address) setShippingAddress(parsed.address);
+    } else {
+      // Set to default placeholder profile if nothing exists
+      setShippingAddress("Jl. Merdeka No. 123, Kecamatan Sukamaju, Kota Jakarta Selatan, 12345");
+    }
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     setLoadingProducts(true);
@@ -97,18 +113,27 @@ export default function MarketplacePage() {
                 Kelola Investasi
             </Link>
 
-            <button className="hidden sm:flex items-center gap-2 bg-emerald-main text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-main/20 hover:opacity-90 active:scale-95 transition-all text-sm">
+            <Link href="/marketplace/orders" title="Keranjang & Pesanan" className="relative hidden sm:flex items-center p-2 text-slate-500 hover:text-emerald-main hover:bg-emerald-50 rounded-full transition-all">
+                <span className="material-symbols-outlined text-[26px]">shopping_cart</span>
+                {cartItems.length > 0 && (
+                    <span className="absolute top-0 right-0 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white shadow-sm">
+                        {cartItems.length}
+                    </span>
+                )}
+            </Link>
+
+            <button className="hidden sm:flex items-center gap-2 bg-emerald-main text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-main/20 hover:bg-emerald-600 hover:shadow-emerald-main/40 active:scale-95 transition-all text-sm">
               <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
               <span>Saldo</span>
             </button>
 
-            <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden hidden sm:block">
+            <Link href="/profile" className="w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden hidden sm:block hover:ring-2 hover:ring-emerald-main transition-all">
               <img 
                 src="https://ui-avatars.com/api/?name=User&background=10B981&color=fff" 
                 alt="Avatar" 
                 className="w-full h-full object-cover"
               />
-            </div>
+            </Link>
           </div>
         </div>
       </header>
@@ -169,7 +194,7 @@ export default function MarketplacePage() {
               <div key={p._id} className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_40px_rgb(16,185,129,0.1)] hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer h-full">
                 <div className="relative h-48 w-full rounded-2xl overflow-hidden mb-4 bg-slate-100">
                   {p.imageUrl ? (
-                    <Image src={p.imageUrl} alt={p.name} fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width:768px) 100vw, 33vw" />
+                    <Image src={p.imageUrl} alt={p.name} fill className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" priority={products.indexOf(p) === 0} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <span className="material-symbols-outlined text-5xl text-slate-200">image</span>
@@ -211,12 +236,9 @@ export default function MarketplacePage() {
                     <button 
                       onClick={(e) => { 
                         e.preventDefault(); 
-                        addToCart({
-                          id: p._id,
-                          name: p.name,
-                          price: p.price,
-                          imageUrl: p.imageUrl
-                        } as any);
+                        setSelectedProduct(p);
+                        setOrderQuantity(1);
+                        setIsOrderModalOpen(true);
                       }} 
                       className="bg-emerald-50 text-emerald-main p-2.5 rounded-xl hover:bg-emerald-main hover:text-white transition-colors" 
                       disabled={p.stock === 0}
@@ -256,7 +278,7 @@ export default function MarketplacePage() {
                         <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-100 overflow-hidden relative">
                            {/* Using any for index signature since CartItem lacks imageUrl natively without extension */}
                           {(item as any).imageUrl ? (
-                            <Image src={(item as any).imageUrl} alt={item.name} fill className="object-cover" />
+                            <Image src={(item as any).imageUrl} alt={item.name} fill sizes="48px" className="object-cover" />
                           ) : (
                             <span className="material-symbols-outlined text-slate-400">image</span>
                           )}
@@ -334,6 +356,113 @@ export default function MarketplacePage() {
         </aside>
 
       </main>
+
+      {/* Order / Checkout Modal */}
+      {isOrderModalOpen && selectedProduct && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl relative animate-in zoom-in duration-200">
+            <button onClick={() => setIsOrderModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
+            
+            <h2 className="text-xl font-extrabold text-emerald-dark mb-4 font-plus">Rincian Pemesanan</h2>
+            
+            <div className="flex gap-4 mb-5 border-b border-slate-100 pb-5">
+              <div className="w-20 h-20 rounded-xl bg-slate-100 overflow-hidden shrink-0 relative border border-slate-200">
+                 {selectedProduct.imageUrl ? (
+                    <Image src={selectedProduct.imageUrl} alt={selectedProduct.name} fill sizes="80px" className="object-cover" />
+                 ) : (
+                    <span className="material-symbols-outlined text-slate-400 flex items-center justify-center w-full h-full">image</span>
+                 )}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-slate-800">{selectedProduct.name}</h3>
+                <p className="text-emerald-main font-bold mt-1">Rp {fmt(selectedProduct.price)} <span className="text-xs text-slate-400 font-normal">/ {selectedProduct.unit}</span></p>
+                <div className="flex items-center gap-3 mt-3 w-fit bg-slate-50 border border-slate-200 rounded-lg py-1 px-2">
+                  <button onClick={() => setOrderQuantity(Math.max(1, orderQuantity - 1))} className="w-6 h-6 text-slate-600 flex items-center justify-center font-bold hover:text-emerald-main">-</button>
+                  <span className="font-bold text-sm w-4 text-center text-slate-800">{orderQuantity}</span>
+                  <button onClick={() => setOrderQuantity(Math.min(selectedProduct.stock, orderQuantity + 1))} className="w-6 h-6 text-slate-600 flex items-center justify-center font-bold hover:text-emerald-main">+</button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mb-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px] text-emerald-500">location_on</span>Alamat Pengiriman</label>
+                <textarea 
+                  value={shippingAddress}
+                  onChange={(e) => setShippingAddress(e.target.value)}
+                  placeholder="Masukkan alamat lengkap pengiriman... (Misal: Jl. Mawar No. 10, RT 01/RW 02)"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 min-h-[80px] bg-slate-50/50 resize-none"
+                />
+              </div>
+              
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Subtotal ({orderQuantity} barang)</span>
+                  <span className="font-semibold text-slate-700">Rp {fmt(selectedProduct.price * orderQuantity)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Ongkos Kirim (Flat)</span>
+                  <span className="font-semibold text-slate-700">Rp 15.000</span>
+                </div>
+                <div className="flex justify-between pt-3 border-t border-slate-200 mt-2 font-bold text-lg text-emerald-dark">
+                  <span>Total Tagihan</span>
+                  <span>Rp {fmt((selectedProduct.price * orderQuantity) + 15000)}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button 
+                onClick={() => {
+                  for(let i=0; i<orderQuantity; i++) {
+                     addToCart({id: selectedProduct._id, name: selectedProduct.name, price: selectedProduct.price, imageUrl: selectedProduct.imageUrl} as any);
+                  }
+                  setIsOrderModalOpen(false);
+                  window.location.href = '/marketplace/orders';
+                }}
+                className="flex-1 py-3 px-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-sm flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+                Masuk Keranjang
+              </button>
+              <button 
+                onClick={async () => {
+                   if (!shippingAddress) return alert("Mohon isi alamat pengiriman dengan lengkap");
+                   try {
+                      const total = (selectedProduct.price * orderQuantity) + 15000;
+                      const response = await fetch('/api/midtrans/transaction', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          amount: total,
+                          firstName: 'Pelanggan',
+                          email: 'pelanggan@freshchain.id'
+                        })
+                      });
+                      const data = await response.json();
+                      if(data.token) {
+                        (window as any).snap.pay(data.token, {
+                          onSuccess: function (result: any) { window.location.href = '/payment/finish'; },
+                          onPending: function (result: any) { window.location.href = '/payment/unfinish'; },
+                          onError: function (result: any) { window.location.href = '/payment/error'; },
+                          onClose: function () { alert('Anda menutup popup sebelum menyelesaikan pembayaran'); }
+                        });
+                        setIsOrderModalOpen(false);
+                      }
+                   } catch (e) {
+                      console.error(e);
+                   }
+                }}
+                className="flex-1 py-3 px-4 bg-emerald-main text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors shadow-md flex items-center justify-center gap-2"
+              >
+                Bayar Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Nav for Mobile */}
       <nav className="lg:hidden fixed bottom-0 w-full bg-white/80 backdrop-blur-xl border-t border-slate-200 flex items-center justify-around py-3 pb-safe-area-inset-bottom z-50 shadow-[0_-4px_20px_rgb(0,0,0,0.05)]">

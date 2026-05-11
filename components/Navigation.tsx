@@ -29,6 +29,13 @@ export default function Navigation() {
                     <span className="material-symbols-outlined text-[18px]">show_chart</span>
                     Kelola Investasi
                 </Link>
+                <Link href="/marketplace/orders" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-100 px-4 py-2 rounded-xl hover:bg-blue-100 transition-colors shadow-sm mr-4">
+                    <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                    Pesanan Saya
+                </Link>
+                <Link href="/marketplace/orders" className="sm:hidden relative mr-4 flex items-center text-blue-700">
+                    <span className="material-symbols-outlined text-3xl">receipt_long</span>
+                </Link>
                 <Link href="/cart" className="relative mr-4 flex items-center">
                     <span className="material-symbols-outlined text-green-800 text-3xl">shopping_cart</span>
                     {mounted && cartCount > 0 && (

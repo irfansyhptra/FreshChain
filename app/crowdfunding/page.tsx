@@ -120,7 +120,11 @@ export default function CrowdfundingPage() {
                 Kelola Investasi
             </Link>
 
-            <button className="hidden sm:flex items-center gap-2 bg-emerald-main text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-main/20 hover:opacity-90 active:scale-95 transition-all text-sm">
+            <Link href="/marketplace/orders" title="Keranjang & Pesanan" className="relative hidden sm:flex items-center p-2 text-slate-500 hover:text-emerald-main hover:bg-emerald-50 rounded-full transition-all">
+                <span className="material-symbols-outlined text-[26px]">shopping_cart</span>
+            </Link>
+
+            <button className="hidden sm:flex items-center gap-2 bg-emerald-main text-white px-5 py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-main/20 hover:bg-emerald-600 hover:shadow-emerald-main/40 active:scale-95 transition-all text-sm">
               <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
               <span>Saldo</span>
             </button>
