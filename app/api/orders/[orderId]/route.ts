@@ -3,9 +3,10 @@ import dbConnect from "@/lib/mongodb/client";
 import { Order } from "@/lib/models/Order";
 
 // PATCH update order status
-export async function PATCH(request: Request, { params }: { params: { orderId: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ orderId: string }> }) {
     try {
         await dbConnect();
+        const { orderId } = await params;
         const body = await request.json();
         const { status } = body;
 
@@ -19,7 +20,7 @@ export async function PATCH(request: Request, { params }: { params: { orderId: s
         }
 
         const order = await Order.findByIdAndUpdate(
-            params.orderId,
+            orderId,
             { status },
             { new: true }
         );

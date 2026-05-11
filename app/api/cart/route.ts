@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb/client";
+import dbConnect from "@/lib/mongodb/client";
 import { Cart } from "@/lib/models/Cart";
 
 // GET cart by sessionId
 export async function GET(request: Request) {
     try {
-        await connectDB();
+        await dbConnect();
         const { searchParams } = new URL(request.url);
         const sessionId = searchParams.get("sessionId");
 
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 // POST update cart sync
 export async function POST(request: Request) {
     try {
-        await connectDB();
+        await dbConnect();
         const body = await request.json();
         const { sessionId, items } = body;
 
