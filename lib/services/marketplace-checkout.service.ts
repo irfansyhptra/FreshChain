@@ -192,13 +192,14 @@ export async function createMarketplaceCheckout(input: MarketplaceCheckoutInput)
         });
 
         if (input.cartSessionId) {
+            // Mark the cart as pending checkout so UI can reflect that payment is in progress
             await Cart.findOneAndUpdate(
                 { sessionId: input.cartSessionId },
                 {
                     $set: {
                         sessionId: input.cartSessionId,
                         checkoutOrderId: order._id,
-                        status: "active",
+                        status: "pending_checkout",
                     },
                 },
                 { upsert: true, new: true }

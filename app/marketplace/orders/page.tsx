@@ -83,7 +83,7 @@ const readInitialTab = (): OrderStatus => {
 };
 
 export default function OrdersPage() {
-  const { cartItems, cartTotal, clearCart, updateQuantity, cartSessionId } = useCart();
+  const { cartItems, cartTotal, clearCart, updateQuantity, cartSessionId, cartStatus } = useCart();
   const [activeTab, setActiveTab] = useState<OrderStatus>(readInitialTab);
   // Per-tab order cache: status -> Order[]
   const [ordersByStatus, setOrdersByStatus] = useState<Record<string, Order[]>>({
@@ -437,16 +437,24 @@ export default function OrdersPage() {
 
                   <div className="flex flex-wrap gap-3 w-full sm:w-auto">
                     {order.status === 'pending' && (
-                      <button 
-                         onClick={async () => {
-                           if (order._id === 'draft-cart') {
-                              startDraftCheckout(order);
-                           }
-                         }}
-                         disabled={checkoutLoading}
-                         className="flex-1 sm:flex-none px-6 py-2.5 shadow-sm text-sm font-semibold rounded-xl text-white bg-emerald-main hover:bg-emerald-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all hover:-translate-y-0.5 hover:shadow-md">
-                        {checkoutLoading ? 'Memproses...' : 'Checkout Sekarang'}
-                      </button>
+                      <> 
+                        {cartStatus === 'pending_checkout' && order._id === 'draft-cart' ? (
+                          <button disabled className="flex-1 sm:flex-none px-6 py-2.5 shadow-sm text-sm font-semibold rounded-xl text-white bg-amber-400 cursor-not-allowed">
+                            Menunggu Pembayaran
+                          </button>
+                        ) : (
+                          <button 
+                             onClick={async () => {
+                               if (order._id === 'draft-cart') {
+                                  startDraftCheckout(order);
+                               }
+                             }}
+                             disabled={checkoutLoading}
+                             className="flex-1 sm:flex-none px-6 py-2.5 shadow-sm text-sm font-semibold rounded-xl text-white bg-emerald-main hover:bg-emerald-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                            {checkoutLoading ? 'Memproses...' : 'Checkout Sekarang'}
+                          </button>
+                        )}
+                      </>
                     )}
                     {order.status === 'shipped' && (
                       <button className="flex-1 sm:flex-none px-6 py-2.5 shadow-sm text-sm font-semibold rounded-xl text-white bg-emerald-main hover:bg-emerald-600 focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all hover:-translate-y-0.5 hover:shadow-md">

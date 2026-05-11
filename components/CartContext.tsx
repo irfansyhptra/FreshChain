@@ -19,6 +19,8 @@ interface CartContextType {
     cartCount: number;
     cartTotal: number;
     cartSessionId: string;
+    cartStatus?: string | null;
+    checkoutOrderId?: string | null;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -79,6 +81,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [cartSessionId] = useState(getOrCreateCartSessionId);
     const [hydrated, setHydrated] = useState(false);
+    const [cartStatus, setCartStatus] = useState<string | null>(null);
+    const [checkoutOrderId, setCheckoutOrderId] = useState<string | null>(null);
     
     // Load from local storage and reconcile with the server cart on mount.
     useEffect(() => {
@@ -92,6 +96,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 const serverCart = json.success ? json.data : null;
 
                 if (cancelled) return;
+
+                setCartStatus(serverCart?.status || 'active');
+                setCheckoutOrderId(serverCart?.checkoutOrderId || null);
 
                 if (serverCart?.status === 'checked_out') {
                     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify([]));
@@ -130,23 +137,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         if (!cartSessionId) return;
 
-        fetch('/api/cart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: cartSessionId,
-                items: cartItems.map((item) => ({
-                    productId: item.id,
-                    name: item.name,
-                    imageUrl: item.imageUrl,
-                    quantity: item.quantity,
-                    price: item.price,
-                })),
-            }),
-        }).catch((e) => {
-            console.error('Failed to sync cart to server', e);
-        });
-    }, [cartItems, cartSessionId, hydrated]);
+        // If server cart is currently marked pending checkout, avoid syncing local snapshot
+        // which could overwrite that state while payment is in progress.
+        if (cartStatus === 'pending_checkout') return;
+
+        (async () => {
+            try {
+                const res = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: cartSessionId,
+                        items: cartItems.map((item) => ({
+                            productId: item.id,
+                            name: item.name,
+                            imageUrl: item.imageUrl,
+                            quantity: item.quantity,
+                            price: item.price,
+                        })),
+                    }),
+                });
+
+                const json = await res.json().catch(() => null);
+                if (json && json.success && json.data) {
+                    setCartStatus(json.data.status || 'active');
+                    setCheckoutOrderId(json.data.checkoutOrderId || null);
+                }
+            } catch (e) {
+                console.error('Failed to sync cart to server', e);
+            }
+        })();
+    }, [cartItems, cartSessionId, hydrated, cartStatus]);
 
     const addToCart = (item: Omit<CartItem, 'quantity'>) => {
         setCartItems(prev => {
@@ -178,11 +199,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCartItems([]);
         if (!cartSessionId) return;
 
-        fetch(`/api/cart?sessionId=${encodeURIComponent(cartSessionId)}`, {
-            method: 'DELETE',
-        }).catch((e) => {
-            console.error('Failed to clear cart on server', e);
-        });
+        // If cart is currently pending checkout on server, avoid sending DELETE which would
+        // reset the server cart status back to active and remove the checkout marker.
+        if (cartStatus === 'pending_checkout') {
+            // keep server-side pending checkout intact; only clear local UI
+            return;
+        }
+
+        (async () => {
+            try {
+                const res = await fetch(`/api/cart?sessionId=${encodeURIComponent(cartSessionId)}`, {
+                    method: 'DELETE',
+                });
+                const json = await res.json().catch(() => null);
+                if (json && json.success && json.data) {
+                    setCartStatus(json.data.status || null);
+                    setCheckoutOrderId(json.data.checkoutOrderId || null);
+                }
+            } catch (e) {
+                console.error('Failed to clear cart on server', e);
+            }
+        })();
     };
 
     const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -198,6 +235,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             cartCount,
             cartTotal,
             cartSessionId
+            , cartStatus, checkoutOrderId
         }}>
             {children}
         </CartContext.Provider>
