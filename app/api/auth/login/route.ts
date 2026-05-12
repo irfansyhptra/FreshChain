@@ -31,6 +31,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
         }
 
+        // Return error if user is rejected
+        if (user.kycStatus === "Rejected") {
+            return NextResponse.json({ error: "Akun Anda ditolak. Silahkan hubungi admin." }, { status: 403 });
+        }
+
         // In a real app we'd set an HttpOnly cookie with JWT here
         // For now, we'll return user info so frontend can route
         return NextResponse.json({ 
@@ -39,7 +44,8 @@ export async function POST(request: Request) {
                 id: user._id,
                 email: user.email,
                 name: user.name,
-                role: user.role
+                role: user.role,
+                kycStatus: user.kycStatus
             }
         });
 
