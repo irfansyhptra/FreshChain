@@ -49,6 +49,10 @@ export default function PetaniMarketplacePage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
 
+  const [ordersModalProduct, setOrdersModalProduct] = useState<{ id: string, name: string } | null>(null);
+  const [productOrders, setProductOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
   const showToast = (msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
@@ -108,6 +112,46 @@ export default function PetaniMarketplacePage() {
       } else showToast(json.message || "Gagal menyimpan", "err");
     } catch { showToast("Terjadi kesalahan", "err"); }
     finally { setSaving(false); }
+  };
+
+  const handleViewOrders = async (productId: string, productName: string) => {
+    setOrdersModalProduct({ id: productId, name: productName });
+    setLoadingOrders(true);
+    setProductOrders([]);
+    try {
+      const res = await fetch("/api/petani/marketplace/orders");
+      const json = await res.json();
+      if (json.success) {
+        const relevant = json.data.filter((txn: any) => 
+          txn.products.some((p: any) => String(p.productId) === productId) &&
+          ["paid", "packed", "shipped"].includes(txn.status)
+        );
+        setProductOrders(relevant);
+      }
+    } catch {
+      showToast("Gagal memuat pesanan", "err");
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (transactionNumber: string) => {
+    try {
+      const res = await fetch("/api/petani/marketplace/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactionNumber, status: "shipped" })
+      });
+      const json = await res.json();
+      if (json.success) {
+        showToast("Status pesanan menjadi terkirim");
+        if (ordersModalProduct) handleViewOrders(ordersModalProduct.id, ordersModalProduct.name);
+      } else {
+        showToast(json.message || "Gagal update status", "err");
+      }
+    } catch {
+      showToast("Terjadi kesalahan", "err");
+    }
   };
 
   const handleStatusChange = async (id: string, status: ProductStatus) => {
@@ -272,6 +316,9 @@ export default function PetaniMarketplacePage() {
                       <span className="material-symbols-outlined text-[16px]">delete</span>
                     </button>
                   </div>
+                  <button onClick={() => handleViewOrders(p._id, p.name)} className="mt-2 w-full flex items-center justify-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-100 py-2.5 rounded-xl hover:bg-emerald-200 transition-colors shadow-sm">
+                    <span className="material-symbols-outlined text-[16px]">receipt_long</span>Pesanan saya
+                  </button>
                 </div>
               </div>
             );
@@ -370,6 +417,87 @@ export default function PetaniMarketplacePage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Orders Modal */}
+      {ordersModalProduct && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+          <div className="bg-white/95 backdrop-blur-xl border border-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300 h-auto max-h-[90vh] flex flex-col">
+            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white/95 sticky top-0 z-10">
+              <h3 className="text-lg font-extrabold text-emerald-dark flex items-center gap-2">
+                <span className="material-symbols-outlined text-emerald-main">receipt_long</span>
+                Pesanan: {ordersModalProduct.name}
+              </h3>
+              <button onClick={() => setOrdersModalProduct(null)} className="text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full p-1.5 transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto bg-slate-50 flex-1 relative">
+              {loadingOrders ? (
+                <div className="text-center py-10 flex flex-col items-center">
+                  <span className="material-symbols-outlined animate-spin text-emerald-main text-3xl mb-2">progress_activity</span>
+                  <p className="text-slate-500 text-sm font-semibold">Memuat pesanan...</p>
+                </div>
+              ) : productOrders.length === 0 ? (
+                 <div className="text-center py-12 bg-white rounded-xl border border-slate-100 shadow-sm max-w-sm mx-auto">
+                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                     <span className="material-symbols-outlined text-3xl text-slate-300">inbox</span>
+                   </div>
+                   <h3 className="font-bold text-slate-700 text-base mb-1">Belum ada pesanan</h3>
+                   <p className="text-slate-400 text-sm">Pesanan masuk untuk produk ini akan muncul di sini.</p>
+                 </div>
+              ) : (
+                <div className="space-y-4">
+                  {productOrders.map((ord) => {
+                    const lineItem = ord.products.find((p: any) => String(p.productId) === ordersModalProduct.id);
+                    return (
+                      <div key={ord._id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-5 justify-between sm:items-center">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">#{ord.transactionNumber.slice(-8)}</span>
+                            <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${ord.status === 'shipped' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {ord.status === 'shipped' ? 'Terkirim' : ord.status === 'paid' || ord.status === 'packed' ? 'Dikemas' : ord.status}
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                              <span className="material-symbols-outlined text-emerald-main">person</span>
+                            </div>
+                            <div>
+                              <h4 className="font-extrabold text-emerald-dark text-sm">{ord.shippingAddress?.receiverName}</h4>
+                              <p className="text-xs text-slate-500 max-w-sm line-clamp-2 mt-0.5">{ord.shippingAddress?.fullAddress}</p>
+                              <div className="mt-2 text-xs font-semibold text-slate-600 bg-slate-50 inline-block px-2.5 py-1.5 rounded-lg border border-slate-100">
+                                Dipesan: <span className="text-emerald-main font-extrabold">{lineItem?.quantity} qty</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0 flex sm:flex-col justify-end gap-2 border-t sm:border-t-0 sm:border-l border-slate-100 pt-4 sm:pt-0 sm:pl-5">
+                          {(ord.status === 'paid' || ord.status === 'packed') ? (
+                            <button onClick={() => handleUpdateOrderStatus(ord.transactionNumber)} className="w-full sm:w-auto bg-gradient-to-r from-emerald-main to-[#10B981] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-1.5 min-w-[140px]">
+                              <span className="material-symbols-outlined text-[16px]">local_shipping</span>
+                              Submit Pesanan
+                            </button>
+                          ) : ord.status === 'shipped' ? (
+                            <div className="w-full sm:w-auto bg-blue-50 text-blue-600 text-xs font-bold px-4 py-2.5 rounded-xl border border-blue-100 flex items-center justify-center gap-1.5 min-w-[140px]">
+                              <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                              Terkirim
+                            </div>
+                          ) : (
+                            <div className="w-full sm:w-auto bg-slate-100 text-slate-500 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-200 flex items-center justify-center gap-1.5 min-w-[140px]">
+                              {ord.status}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
